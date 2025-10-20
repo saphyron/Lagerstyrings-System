@@ -1,23 +1,45 @@
-// Program.cs
-using LagerstyringsSystem.Database; 
-using Dapper;
+using LagerstyringsSystem.Database;
+using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
-class Program
-{
-    static async Task Main(string[] args)
+var builder = WebApplication.CreateBuilder(args);
+
+// Connection factory
+builder.Services.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
+
+// JWT Authentication
+var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key missing");
+var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "LSS";
+var jwtAudience = builder.Configuration["Jwt:Audience"] ?? jwtIssuer;
+
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        var config = new ConfigurationBuilder()
-            .SetBasePath(Directory.GetCurrentDirectory())
-            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-            .Build();
+        options.TokenValidationParameters = new TokenValidationParameters
+        {
+            ValidateIssuer = true,
+            ValidateAudience = true,
+            ValidateIssuerSigningKey = true,
+            ValidIssuer = jwtIssuer,
+            ValidAudience = jwtAudience,
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+        };
+    });
 
-        var factory = new SqlConnectionFactory(config);
+builder.Services.AddAuthorization();
 
-        using var conn = factory.Create(); 
-        conn.Open(); 
+var app = builder.Build();
 
-        // Testquery 
-        var tables = await conn.ExecuteScalarAsync<int>("SELECT COUNT(*) FROM sys.tables");
-        Console.WriteLine($"Tables: {tables}");
-    }
-}
+app.UseAuthentication();
+app.UseAuthorization();
+
+// Map endpoints
+app.MapUserEndpoints();
+app.MapAuthEndpoints();
+
+app.MapGet("/", () => Results.Ok(new { ok = true, service = "Lagerstyrings System API" }));
+
+app.Run();
