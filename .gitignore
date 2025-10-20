@@ -6,6 +6,8 @@
 *.lo
 *.o
 *.obj
+Lagerstyrings System/obj/
+Lagerstyrings System/bin/
 
 # Precompiled Headers
 *.gch
