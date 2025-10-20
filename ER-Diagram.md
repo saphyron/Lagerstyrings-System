@@ -32,7 +32,7 @@ erDiagram
     USERS {
         int Id PK
         nvarchar Username
-        nvarchar PasswordHash
+        nvarchar PasswordClear
         tinyint AuthEnum FK
     }
     WAREHOUSES {
