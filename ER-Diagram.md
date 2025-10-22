@@ -15,7 +15,7 @@ erDiagram
 
     WAREHOUSES ||--o{ ORDERS    : from_or_to
 
-    SALESORDERS    ||--o{ ORDERITEMS      : has_items
+    ORDERS    ||--o{ ORDERITEMS      : has_items
 
     PRODUCTS ||--o{ ORDERITEMS      : product
 
