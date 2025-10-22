@@ -1,7 +1,7 @@
 ﻿namespace Lagerstyrings_System {
     public class Warehouse : IWarehouse {
         public long Id { get; }
-        public String? Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Create a new Warehouse object with a database parallel of given name.
@@ -13,9 +13,9 @@
         /// Create a new Warehouse object with a database parallel of given name.
         /// </summary>
         /// <param name="name">Human-legible name of Warehouse</param>
-        public Warehouse(String? name) {
+        public Warehouse(string? name) {
             //  Database create new warehouse
-            this.Name = name;
+            Name = name;
         }
 
         /// <summary>
@@ -24,7 +24,7 @@
         /// <param name="id">ID of Warehouse in database</param>
         public Warehouse(long id) {
             //  this object should populate from database
-            this.Id = id;
+            Id = id;
             throw new NotImplementedException();
         }
 

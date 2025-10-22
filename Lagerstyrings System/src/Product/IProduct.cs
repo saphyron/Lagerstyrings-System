@@ -14,7 +14,7 @@
         /// Human-legible name of warehouse.
         /// Not strictly necessary? Recommended to set anyway.
         /// </summary>
-        String? Name { get; set; }
+        string? Name { get; set; }
         /// <summary>
         /// Sub-classification of product. 
         /// May be used to implement rules of handling, such as FIFO-principles or 

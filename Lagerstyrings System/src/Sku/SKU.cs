@@ -38,7 +38,7 @@
         /// <param name="id">ID of SKU</param>
         public SKU(long id) {
             //  Get existing SKU from database, and populate
-            this.Id = id;
+            Id = id;
             warehouse = null; throw new NotImplementedException();
         }
     }

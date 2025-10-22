@@ -9,7 +9,7 @@
         /// Human-legible name of warehouse.
         /// Not strictly necessary.
         /// </summary>
-        String? Name { get; set; }
+        string? Name { get; set; }
 
         /// <summary>
         /// Add an existing stock-keeping unit tied to this warehouse, or create 
