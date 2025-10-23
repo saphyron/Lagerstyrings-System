@@ -1,4 +1,4 @@
-namespace LagerstyringsSystem.Orders {
+/*namespace LagerstyringsSystem.Orders {
 
     public class Shipment
     {
@@ -27,3 +27,4 @@ namespace LagerstyringsSystem.Orders {
         }
     }
 }
+*/

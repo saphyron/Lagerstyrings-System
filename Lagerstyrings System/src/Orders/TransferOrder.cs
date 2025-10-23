@@ -1,4 +1,4 @@
-namespace LagerstyringsSystem.Orders {
+/*namespace LagerstyringsSystem.Orders {
     
     
 }
@@ -63,4 +63,4 @@ public class TransferOrder : IOrder
         }
         return details;
     }
-}
+}*/

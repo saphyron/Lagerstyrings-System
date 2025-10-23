@@ -1,4 +1,4 @@
-using LagerstyringsSystem.Database;
+/*using LagerstyringsSystem.Database;
 using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
 
 namespace LagerstyringsSystem.Orders
@@ -69,8 +69,8 @@ namespace LagerstyringsSystem.Orders
             {
                 refund += item.Price * item.Quantity;
             }
-            
-            return refund
+
+            return refund;
         }
         
         public string GetOrderDetails()
@@ -83,4 +83,4 @@ namespace LagerstyringsSystem.Orders
             return details;
         }
     }
-}
+}*/

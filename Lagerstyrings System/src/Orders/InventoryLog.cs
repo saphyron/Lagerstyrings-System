@@ -1,4 +1,4 @@
-using LagerstyringsSystem.Database;
+/*using LagerstyringsSystem.Database;
 using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
 using Microsoft.Data.SqlClient;
 
@@ -45,4 +45,4 @@ namespace LagerstyringsSystem.Orders {
             }
         }
     }   
-}
+}*/

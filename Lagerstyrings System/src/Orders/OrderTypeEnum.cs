@@ -1,4 +1,4 @@
-namespace LagerstyringsSystem.Orders {
+/*namespace LagerstyringsSystem.Orders {
     public enum OrderTypeEnum
     {
         SaleOrder,
@@ -6,4 +6,4 @@ namespace LagerstyringsSystem.Orders {
         ReturnOrder,
         PurchaseOrder
     }
-}
+}*/
