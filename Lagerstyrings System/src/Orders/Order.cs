@@ -56,8 +56,6 @@ namespace LagerstyringsSystem.Orders
         {
 
         }
-        
-        pubic
 
         public void CancelOrder()
         {
