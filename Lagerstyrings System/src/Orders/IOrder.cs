@@ -1,4 +1,4 @@
-/*namespace LagerstyringsSystem.Orders {
+namespace LagerstyringsSystem.Orders {
     
     interface IOrder
     {
@@ -10,4 +10,4 @@
         
         string GetOrderDetails();
     }   
-}*/
+}

@@ -12,7 +12,7 @@ public class CatalogContractTests
     {
         var url = Environment.GetEnvironmentVariable("CATALOG_URL");
         if (string.IsNullOrWhiteSpace(url))
-            throw new InvalidOperationException("Set CATALOG_URL (e.g. http://localhost:5081)");
+            throw new InvalidOperationException("Set CATALOG_URL (e.g. http://localhost:5107)");
         return url.TrimEnd('/');
     }
 

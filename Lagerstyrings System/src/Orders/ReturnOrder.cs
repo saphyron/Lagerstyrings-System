@@ -1,4 +1,4 @@
-/*namespace LagerstyringsSystem.Orders {
+namespace LagerstyringsSystem.Orders {
     
     
 }
@@ -59,4 +59,4 @@ public class ReturnOrder : IOrder
         }
         return details;
     }
-}*/
+}

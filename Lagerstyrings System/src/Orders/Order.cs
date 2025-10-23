@@ -1,4 +1,4 @@
-/*using LagerstyringsSystem.Database;
+using LagerstyringsSystem.Database;
 using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
 
 namespace LagerstyringsSystem.Orders
@@ -83,4 +83,4 @@ namespace LagerstyringsSystem.Orders
             return details;
         }
     }
-}*/
+}
