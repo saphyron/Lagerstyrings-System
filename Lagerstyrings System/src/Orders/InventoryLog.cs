@@ -1,14 +1,18 @@
+using LagerstyringsSystem.Database;
+using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
+using Microsoft.Data.SqlClient;
+
 namespace LagerstyringsSystem.Orders {
-    
+
     public class InventoryLog
     {
-        public int Id { get; set; }
+        public long Id { get; set; }
         public DateTime Timestamp { get; set; }
-        public int OrderId { get; set; }
-        public int ProductId { get; set; }
-        public int ToWarehouseId { get; set; }
-        public int FromWarehouseId { get; set; }
-        public int UserId { get; set; }
+        public long OrderId { get; set; }
+        public long ProductId { get; set; }
+        public long ToWarehouseId { get; set; }
+        public long FromWarehouseId { get; set; }
+        public long UserId { get; set; }
         
         public Order Order { get; set; }
         public Product Product { get; set; }
@@ -16,7 +20,7 @@ namespace LagerstyringsSystem.Orders {
         public Warehouse FromWarehouse { get; set; }
         public User User { get; set; }
         
-        public InventoryLog(DateTime timestamp, int orderId, int productId, int toWarehouseId, int fromWarehouseId, int userId)
+        public InventoryLog(DateTime timestamp, long orderId, long productId, long toWarehouseId, long fromWarehouseId, long userId)
         {
             Timestamp = timestamp;
             OrderId = orderId;
@@ -24,6 +28,21 @@ namespace LagerstyringsSystem.Orders {
             ToWarehouseId = toWarehouseId;
             FromWarehouseId = fromWarehouseId;
             UserId = userId;
+        }
+
+        public void Save()
+        {
+            var config = new ConfigurationManager();
+            string sql = "INSERT INTO InventoryLogs (Timestamp, OrderId, ProductId, ToWarehouseId, FromWarehouseId, UserId) " +
+                         $"VALUES ({Timestamp}, {OrderId}, {ProductId}, {ToWarehouseId}, {FromWarehouseId}, {UserId});";
+            using (var connection = new SqlConnection(config.GetConnectionString("Default")))
+            {
+                connection.Open();
+                using (var command = new SqlCommand(sql, connection))
+                {
+                    command.ExecuteNonQuery();
+                }
+            }
         }
     }   
 }
