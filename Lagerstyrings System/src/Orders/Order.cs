@@ -116,7 +116,7 @@ namespace LagerstyringsSystem.Orders
 
         public void SaleOrder()
         {
-
+            throw new NotImplementedException();
         }
 
         public void TransferOrder()
