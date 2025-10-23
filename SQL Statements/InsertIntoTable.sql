@@ -1,19 +1,4 @@
-﻿-- Lookup for roller/autorisation (AuthEnum)
-/*IF OBJECT_ID('dbo.AuthRoles', 'U') IS NULL
-BEGIN
-  CREATE TABLE dbo.AuthRoles (
-      AuthEnum     TINYINT       NOT NULL PRIMARY KEY,
-      Name         NVARCHAR(32)  NOT NULL UNIQUE
-  );
-
-  INSERT INTO dbo.AuthRoles(AuthEnum, Name) VALUES
-    (1, N'Admin'),
-    (2, N'StoreUser'),
-    (3, N'WarehouseUser');
-END
-GO*/
-
--- Test Data --
+﻿-- Test Data --
 -- Seed master data once
 INSERT dbo.AuthRoles(AuthEnum, Name) VALUES (1, N'Admin');
 INSERT dbo.Users(Username, PasswordClear, AuthEnum) VALUES (N'john', N'test', 1);
@@ -25,12 +10,12 @@ INSERT dbo.WarehouseProducts (WarehouseId, ProductId, Quantity)
 VALUES (1,1,10), (1,2,3), (1,3,10);
 
 -- Create a sales order header (from Main)
-INSERT dbo.SalesOrders(FromWarehouseId, ToWarehouseId, UserId)
-VALUES (1, NULL, 1);
+INSERT dbo.Orders(FromWarehouseId, ToWarehouseId, UserId, OrderType)
+VALUES (1, NULL, 1, 'Sales');
 DECLARE @OrderId BIGINT = SCOPE_IDENTITY();
 
 -- Add multiple items (trigger will subtract stock and write logs)
-INSERT dbo.SalesOrderItems(OrderId, ProductId, ItemCount)
+INSERT dbo.OrderItems(OrderId, ProductId, ItemCount)
 VALUES
   (@OrderId, 1, 5),
   (@OrderId, 2, 2),
@@ -39,3 +24,4 @@ VALUES
 -- Check results
 SELECT * FROM dbo.WarehouseProducts ORDER BY WarehouseId, ProductId; -- stock updated
 SELECT * FROM dbo.InventoryLog ORDER BY Id;                           -- 3 rows with 'S'
+

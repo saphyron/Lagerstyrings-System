@@ -95,7 +95,71 @@ function Add-CodeBlock([string[]]$content) {
   Add-Line('```')
 }
 
-# ---------- build markdown ----------
+# --- Extract expected/actual heuristics (from ErrorInfo.Message or StdOut) ---
+function Extract-ExpectedActual {
+  param([string]$text)
+  $result = @{ Expected = $null; Actual = $null }
+
+  if ([string]::IsNullOrWhiteSpace($text)) { return $result }
+
+  # Pattern 1: xUnit style
+  #   Expected: foo
+  #   Actual:   bar
+  $m = [regex]::Match($text, "(?im)^\s*Expected:\s*(.+)\r?\n\s*Actual:\s*(.+)$")
+  if ($m.Success) {
+    $result.Expected = $m.Groups[1].Value.Trim()
+    $result.Actual   = $m.Groups[2].Value.Trim()
+    return $result
+  }
+
+  # Pattern 2: FluentAssertions common phrasing:
+  #   ... to be <expected> but found <actual>.
+  $m2 = [regex]::Match($text, "(?is)to be\s+(.+?)\s+but\s+found\s+(.+?)(?:[.\r\n]|$)")
+  if ($m2.Success) {
+    $result.Expected = $m2.Groups[1].Value.Trim()
+    $result.Actual   = $m2.Groups[2].Value.Trim()
+    return $result
+  }
+
+  # Pattern 3: Occasionally libraries write "Expected <e>, Actual <a>"
+  $m3 = [regex]::Match($text, "(?i)Expected\s*<(.+?)>\s*,?\s*Actual\s*<(.+?)>")
+  if ($m3.Success) {
+    $result.Expected = $m3.Groups[1].Value.Trim()
+    $result.Actual   = $m3.Groups[2].Value.Trim()
+    return $result
+  }
+
+  # Pattern 4: If tests print their own markers in StdOut:
+  #   EXPECT: ...
+  #   ACTUAL: ...
+  $m4 = [regex]::Match($text, "(?im)^\s*EXPECT:\s*(.+)\r?\n\s*ACTUAL:\s*(.+)$")
+  if ($m4.Success) {
+    $result.Expected = $m4.Groups[1].Value.Trim()
+    $result.Actual   = $m4.Groups[2].Value.Trim()
+    return $result
+  }
+
+  return $result
+}
+
+# Map UnitTest ID -> fully qualified name (if available)
+function Build-TestMap {
+  param([xml]$xml)
+  $map = @{}
+  if ($xml.TestRun -and $xml.TestRun.TestDefinitions -and $xml.TestRun.TestDefinitions.UnitTest) {
+    $defs = @($xml.TestRun.TestDefinitions.UnitTest)
+    foreach ($d in $defs) {
+      $id = "" + $d.id
+      $name = $d.Name
+      $class = $null
+      if ($d.TestMethod -and $d.TestMethod.className) { $class = $d.TestMethod.className }
+      if ($class) { $name = $class + "::" + $name }
+      $map[$id] = $name
+    }
+  }
+  return $map
+}
+
 Add-Line("# Test Report")
 Add-Empty
 Add-Line("- **Timestamp:** " + $stamp)
@@ -132,16 +196,35 @@ try {
     Add-Line("| $total | $passed | $failed | $skipped |")
     Add-Empty
 
-    $failedNodes = @()
+    # Build test map
+    $testMap = Build-TestMap -xml $xml
+
+    # Collect result nodes
+    $allResults = @()
     if ($xml.TestRun.Results -and $xml.TestRun.Results.UnitTestResult) {
-      $all = @($xml.TestRun.Results.UnitTestResult)
-      foreach ($n in $all) { if ($n.outcome -eq 'Failed') { $failedNodes += $n } }
+      $allResults = @($xml.TestRun.Results.UnitTestResult)
     }
 
+    $passedNodes = @()
+    $failedNodes = @()
+    $skippedNodes = @()
+
+    foreach ($r in $allResults) {
+      switch ("" + $r.outcome) {
+        "Passed"  { $passedNodes  += $r }
+        "Failed"  { $failedNodes  += $r }
+        "NotExecuted" { $skippedNodes += $r }
+        default   { }
+      }
+    }
+
+    # ----- Failed tests (with Expected/Actual parsing) -----
     if ($failedNodes.Count -gt 0) {
       Add-Line("## Failed tests"); Add-Empty
       foreach ($n in $failedNodes) {
-        Add-Line("### " + $n.testName)
+        $name = $n.testName
+        if ($n.testId -and $testMap.ContainsKey("" + $n.testId)) { $name = $testMap["" + $n.testId] }
+        Add-Line("### " + $name)
 
         $msg = $null
         if ($n.Output -and $n.Output.ErrorInfo -and $n.Output.ErrorInfo.Message) {
@@ -152,20 +235,83 @@ try {
           Add-CodeBlock(@($msg.Trim()))
         }
 
+        # Try Expected/Actual from message first
+        $ea = Extract-ExpectedActual -text $msg
+
+        # If not found, try StdOut
+        if (-not $ea.Expected -and $n.Output -and $n.Output.StdOut) {
+          $ea2 = Extract-ExpectedActual -text ($n.Output.StdOut -join "`n")
+          if ($ea2.Expected) { $ea = $ea2 }
+        }
+
+        if ($ea.Expected -or $ea.Actual) {
+          Add-Empty
+          Add-Line("**Expected vs Actual (parsed):**"); Add-Empty
+          Add-Line("| Expected | Actual |")
+          Add-Line("|----------|--------|")
+          Add-Line("| " + ($ea.Expected -replace '\|','\|') + " | " + ($ea.Actual -replace '\|','\|') + " |")
+          Add-Empty
+        }
+
         $st = $null
         if ($n.Output -and $n.Output.ErrorInfo -and $n.Output.ErrorInfo.StackTrace) {
           $st = ($n.Output.ErrorInfo.StackTrace -join "`n")
         }
         if ($st) {
-          Add-Empty; Add-Line("**StackTrace:**"); Add-Empty
+          Add-Line("**StackTrace:**"); Add-Empty
           $stLines = [regex]::Split($st, "`r?`n") | Select-Object -First 80
           Add-CodeBlock($stLines)
         }
+
+        # Duration
+        if ($n.duration) {
+          Add-Line("**Duration:** " + $n.duration); Add-Empty
+        }
+
         Add-Empty
       }
-    } else {
-      Add-Line("All tests passed."); Add-Empty
     }
+
+    # ----- Passed tests (with “what was expected / what came out”) -----
+    if ($passedNodes.Count -gt 0) {
+      Add-Line("## Passed tests"); Add-Empty
+      Add-Line("| Test | Duration | Notes |")
+      Add-Line("|------|----------|-------|")
+      foreach ($n in $passedNodes) {
+        $name = $n.testName
+        if ($n.testId -and $testMap.ContainsKey("" + $n.testId)) { $name = $testMap["" + $n.testId] }
+
+        $dur  = ""
+        if ($n.duration) { $dur = "" + $n.duration }
+
+        # Try to find Expected/Actual in StdOut (only if tests print them)
+        $notes = "Matched expected behaviour."
+        if ($n.Output -and $n.Output.StdOut) {
+          $ea = Extract-ExpectedActual -text ($n.Output.StdOut -join "`n")
+          if ($ea.Expected -and $ea.Actual) {
+            $notes = "Expected = " + $ea.Expected + "; Actual = " + $ea.Actual
+          }
+        }
+
+        # Escape pipes in name/notes to not break table
+        $safeName  = ($name  -replace '\|','\|')
+        $safeNotes = ($notes -replace '\|','\|')
+        Add-Line("| $safeName | $dur | $safeNotes |")
+      }
+      Add-Empty
+    }
+
+    # ----- Skipped tests -----
+    if ($skippedNodes.Count -gt 0) {
+      Add-Line("## Skipped tests"); Add-Empty
+      foreach ($n in $skippedNodes) {
+        $name = $n.testName
+        if ($n.testId -and $testMap.ContainsKey("" + $n.testId)) { $name = $testMap["" + $n.testId] }
+        Add-Line("- " + $name)
+      }
+      Add-Empty
+    }
+
   } else {
     Add-Line("No TRX file found in " + $runDir + "."); Add-Empty
   }
