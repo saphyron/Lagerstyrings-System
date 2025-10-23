@@ -11,21 +11,13 @@ erDiagram
     WAREHOUSES ||--o{ WAREHOUSEPRODUCTS : stocks
     PRODUCTS   ||--o{ WAREHOUSEPRODUCTS : listed
 
-    USERS      ||--o{ SALESORDERS    : placed_by
-    USERS      ||--o{ RETURNORDERS   : placed_by
-    USERS      ||--o{ TRANSFERORDERS : placed_by
+    USERS      ||--o{ ORDERS    : placed_by
 
-    WAREHOUSES ||--o{ SALESORDERS    : from_or_to
-    WAREHOUSES ||--o{ RETURNORDERS   : from_or_to
-    WAREHOUSES ||--o{ TRANSFERORDERS : from_or_to
+    WAREHOUSES ||--o{ ORDERS    : from_or_to
 
-    SALESORDERS    ||--o{ SALESORDERITEMS      : has_items
-    RETURNORDERS   ||--o{ RETURNORDERITEMS     : has_items
-    TRANSFERORDERS ||--o{ TRANSFERORDERITEMS   : has_items
+    ORDERS    ||--o{ ORDERITEMS      : has_items
 
-    PRODUCTS ||--o{ SALESORDERITEMS      : product
-    PRODUCTS ||--o{ RETURNORDERITEMS     : product
-    PRODUCTS ||--o{ TRANSFERORDERITEMS   : product
+    PRODUCTS ||--o{ ORDERITEMS      : product
 
     PRODUCTS   ||--o{ INVENTORYLOG : logged
     WAREHOUSES ||--o{ INVENTORYLOG : from_or_to
@@ -56,45 +48,21 @@ erDiagram
         int ProductId FK
         int Quantity
     }
-    SALESORDERS {
+    ORDERS {
         bigint Id PK
         int FromWarehouseId FK  "nullable"
         int ToWarehouseId   FK  "nullable"
         int UserId          FK
         datetime2 CreatedAt
+        char OrderType  "S|R|T"
     }
-    SALESORDERITEMS {
+    ORDERITEMS {
         bigint Id PK
         bigint OrderId   FK
         int ProductId    FK
         int ItemCount
     }
-    RETURNORDERS {
-        bigint Id PK
-        int FromWarehouseId FK  "nullable"
-        int ToWarehouseId   FK  "nullable"
-        int UserId          FK
-        datetime2 CreatedAt
-    }
-    RETURNORDERITEMS {
-        bigint Id PK
-        bigint OrderId   FK
-        int ProductId    FK
-        int ItemCount
-    }
-    TRANSFERORDERS {
-        bigint Id PK
-        int FromWarehouseId FK  "nullable"
-        int ToWarehouseId   FK  "nullable"
-        int UserId          FK
-        datetime2 CreatedAt
-    }
-    TRANSFERORDERITEMS {
-        bigint Id PK
-        bigint OrderId   FK
-        int ProductId    FK
-        int ItemCount
-    }
+    
     INVENTORYLOG {
         bigint Id PK
         datetime2 Timestamp

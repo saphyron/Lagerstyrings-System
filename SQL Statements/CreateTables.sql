@@ -13,29 +13,45 @@ IF OBJECT_ID('dbo.vw_ProductStock', 'V') IS NOT NULL
     DROP VIEW dbo.vw_ProductStock;
 GO
 
--- Drop old order-level log triggers if they exist
+-- Drop old order-level log triggers if they exist (outdated names)
 IF OBJECT_ID('dbo.tr_SalesOrders_Log',   'TR') IS NOT NULL DROP TRIGGER dbo.tr_SalesOrders_Log;
 IF OBJECT_ID('dbo.tr_ReturnOrders_Log',  'TR') IS NOT NULL DROP TRIGGER dbo.tr_ReturnOrders_Log;
 IF OBJECT_ID('dbo.tr_TransferOrders_Log','TR') IS NOT NULL DROP TRIGGER dbo.tr_TransferOrders_Log;
 
--- Drop item-level log triggers
+-- Drop item-level log triggers (outdated names)
 IF OBJECT_ID('dbo.tr_SalesOrderItems_Log',    'TR') IS NOT NULL DROP TRIGGER dbo.tr_SalesOrderItems_Log;
 IF OBJECT_ID('dbo.tr_ReturnOrderItems_Log',   'TR') IS NOT NULL DROP TRIGGER dbo.tr_ReturnOrderItems_Log;
 IF OBJECT_ID('dbo.tr_TransferOrderItems_Log', 'TR') IS NOT NULL DROP TRIGGER dbo.tr_TransferOrderItems_Log;
 
--- Drop stock update triggers
+-- Drop stock update triggers (outdated names)
 IF OBJECT_ID('dbo.tr_SalesOrderItems_Stock',    'TR') IS NOT NULL DROP TRIGGER dbo.tr_SalesOrderItems_Stock;
 IF OBJECT_ID('dbo.tr_ReturnOrderItems_Stock',   'TR') IS NOT NULL DROP TRIGGER dbo.tr_ReturnOrderItems_Stock;
 IF OBJECT_ID('dbo.tr_TransferOrderItems_Stock', 'TR') IS NOT NULL DROP TRIGGER dbo.tr_TransferOrderItems_Stock;
 GO
 
+-- Drop old order-level log triggers if they exist 
+IF OBJECT_ID('dbo.tr_Orders_Log',   'TR') IS NOT NULL DROP TRIGGER dbo.tr_Orders_Log;
+
+-- Drop item-level log triggers
+IF OBJECT_ID('dbo.tr_OrderItems_Log',    'TR') IS NOT NULL DROP TRIGGER dbo.tr_OrderItems_Log;
+
+-- Drop stock update triggers
+IF OBJECT_ID('dbo.tr_OrderItems_Stock',    'TR') IS NOT NULL DROP TRIGGER dbo.tr_OrderItems_Stock;
+GO
+
 -- Drop child tables first
 IF OBJECT_ID('dbo.InventoryLog', 'U')         IS NOT NULL DROP TABLE dbo.InventoryLog;
+IF OBJECT_ID('dbo.OrderItems', 'U')      IS NOT NULL DROP TABLE dbo.OrderItems;
+
+-- Drop order header tables
+IF OBJECT_ID('dbo.Orders', 'U')          IS NOT NULL DROP TABLE dbo.Orders;
+
+-- Drop child tables first (old names)
 IF OBJECT_ID('dbo.SalesOrderItems', 'U')      IS NOT NULL DROP TABLE dbo.SalesOrderItems;
 IF OBJECT_ID('dbo.ReturnOrderItems', 'U')     IS NOT NULL DROP TABLE dbo.ReturnOrderItems;
 IF OBJECT_ID('dbo.TransferOrderItems', 'U')   IS NOT NULL DROP TABLE dbo.TransferOrderItems;
 
--- Drop order header tables
+-- Drop order header tables (old names)
 IF OBJECT_ID('dbo.SalesOrders', 'U')          IS NOT NULL DROP TABLE dbo.SalesOrders;
 IF OBJECT_ID('dbo.ReturnOrders', 'U')         IS NOT NULL DROP TABLE dbo.ReturnOrders;
 IF OBJECT_ID('dbo.TransferOrders', 'U')       IS NOT NULL DROP TABLE dbo.TransferOrders;
@@ -106,115 +122,55 @@ GO
    Orders: headers + items (multi-item)
    --------------------------------- */
 
--- 6) SalesOrders (header)
-CREATE TABLE dbo.SalesOrders (
+-- 6) Orders (header)
+CREATE TABLE dbo.Orders (
     Id               BIGINT IDENTITY(1,1) PRIMARY KEY,
-    FromWarehouseId  INT      NULL,   -- required by stock trigger (validated there)
-    ToWarehouseId    INT      NULL,
-    UserId           INT      NOT NULL,
-    CreatedAt        DATETIME2(3) NOT NULL CONSTRAINT DF_SalesOrders_CreatedAt DEFAULT (SYSUTCDATETIME()),
-    CONSTRAINT FK_SalesOrders_FromWarehouse  FOREIGN KEY (FromWarehouseId) REFERENCES dbo.Warehouses(Id),
-    CONSTRAINT FK_SalesOrders_ToWarehouse    FOREIGN KEY (ToWarehouseId)   REFERENCES dbo.Warehouses(Id),
-    CONSTRAINT FK_SalesOrders_User           FOREIGN KEY (UserId)          REFERENCES dbo.Users(Id)
+    FromWarehouseId  INT                NULL,   -- required by stock trigger (validated there)
+    ToWarehouseId    INT                NULL,
+    UserId           INT                NOT NULL,
+    OrderType        NVARCHAR(100)      NOT NULL,  -- 'Sales'|'Return'|'Transfer'|'Purchase'
+    CreatedAt        DATETIME2(3)       NOT NULL CONSTRAINT DF_Orders_CreatedAt DEFAULT (SYSUTCDATETIME()),
+    CONSTRAINT FK_Orders_FromWarehouse  FOREIGN KEY (FromWarehouseId) REFERENCES dbo.Warehouses(Id),
+    CONSTRAINT FK_Orders_ToWarehouse    FOREIGN KEY (ToWarehouseId)   REFERENCES dbo.Warehouses(Id),
+    CONSTRAINT FK_Orders_User           FOREIGN KEY (UserId)          REFERENCES dbo.Users(Id)
 );
-CREATE INDEX IX_SalesOrders_FromWarehouseId ON dbo.SalesOrders(FromWarehouseId);
-CREATE INDEX IX_SalesOrders_ToWarehouseId   ON dbo.SalesOrders(ToWarehouseId);
-CREATE INDEX IX_SalesOrders_UserId          ON dbo.SalesOrders(UserId);
-CREATE INDEX IX_SalesOrders_CreatedAt       ON dbo.SalesOrders(CreatedAt);
+CREATE INDEX IX_Orders_FromWarehouseId ON dbo.Orders(FromWarehouseId);
+CREATE INDEX IX_Orders_ToWarehouseId   ON dbo.Orders(ToWarehouseId);
+CREATE INDEX IX_Orders_UserId          ON dbo.Orders(UserId);
+CREATE INDEX IX_Orders_CreatedAt       ON dbo.Orders(CreatedAt);
 GO
 
--- 6b) SalesOrderItems (detail rows)
-CREATE TABLE dbo.SalesOrderItems (
+-- 6b) OrderItems (detail rows)
+CREATE TABLE dbo.OrderItems (
     Id        BIGINT IDENTITY(1,1) PRIMARY KEY,
     OrderId   BIGINT NOT NULL,
     ProductId INT    NOT NULL,
     ItemCount INT    NOT NULL,
-    CONSTRAINT CK_SalesOrderItems_ItemCount CHECK (ItemCount > 0),
-    CONSTRAINT FK_SalesOrderItems_Order   FOREIGN KEY (OrderId)   REFERENCES dbo.SalesOrders(Id) ON DELETE CASCADE,
-    CONSTRAINT FK_SalesOrderItems_Product FOREIGN KEY (ProductId) REFERENCES dbo.Products(Id)
+    CONSTRAINT CK_OrderItems_ItemCount CHECK (ItemCount > 0),
+    CONSTRAINT FK_OrderItems_Order   FOREIGN KEY (OrderId)   REFERENCES dbo.Orders(Id) ON DELETE CASCADE,
+    CONSTRAINT FK_OrderItems_Product FOREIGN KEY (ProductId) REFERENCES dbo.Products(Id)
 );
-CREATE INDEX IX_SalesOrderItems_OrderId   ON dbo.SalesOrderItems(OrderId);
-CREATE INDEX IX_SalesOrderItems_ProductId ON dbo.SalesOrderItems(ProductId);
+CREATE INDEX IX_OrderItems_OrderId   ON dbo.OrderItems(OrderId);
+CREATE INDEX IX_OrderItems_ProductId ON dbo.OrderItems(ProductId);
 GO
 
--- 7) ReturnOrders (header)
-CREATE TABLE dbo.ReturnOrders (
-    Id               BIGINT IDENTITY(1,1) PRIMARY KEY,
-    FromWarehouseId  INT      NULL,
-    ToWarehouseId    INT      NULL,   -- required by stock trigger (validated there)
-    UserId           INT      NOT NULL,
-    CreatedAt        DATETIME2(3) NOT NULL CONSTRAINT DF_ReturnOrders_CreatedAt DEFAULT (SYSUTCDATETIME()),
-    CONSTRAINT FK_ReturnOrders_FromWarehouse  FOREIGN KEY (FromWarehouseId) REFERENCES dbo.Warehouses(Id),
-    CONSTRAINT FK_ReturnOrders_ToWarehouse    FOREIGN KEY (ToWarehouseId)   REFERENCES dbo.Warehouses(Id),
-    CONSTRAINT FK_ReturnOrders_User           FOREIGN KEY (UserId)          REFERENCES dbo.Users(Id)
-);
-CREATE INDEX IX_ReturnOrders_FromWarehouseId ON dbo.ReturnOrders(FromWarehouseId);
-CREATE INDEX IX_ReturnOrders_ToWarehouseId   ON dbo.ReturnOrders(ToWarehouseId);
-CREATE INDEX IX_ReturnOrders_UserId          ON dbo.ReturnOrders(UserId);
-CREATE INDEX IX_ReturnOrders_CreatedAt       ON dbo.ReturnOrders(CreatedAt);
-GO
-
--- 7b) ReturnOrderItems
-CREATE TABLE dbo.ReturnOrderItems (
-    Id        BIGINT IDENTITY(1,1) PRIMARY KEY,
-    OrderId   BIGINT NOT NULL,
-    ProductId INT    NOT NULL,
-    ItemCount INT    NOT NULL,
-    CONSTRAINT CK_ReturnOrderItems_ItemCount CHECK (ItemCount > 0),
-    CONSTRAINT FK_ReturnOrderItems_Order   FOREIGN KEY (OrderId)   REFERENCES dbo.ReturnOrders(Id) ON DELETE CASCADE,
-    CONSTRAINT FK_ReturnOrderItems_Product FOREIGN KEY (ProductId) REFERENCES dbo.Products(Id)
-);
-CREATE INDEX IX_ReturnOrderItems_OrderId   ON dbo.ReturnOrderItems(OrderId);
-CREATE INDEX IX_ReturnOrderItems_ProductId ON dbo.ReturnOrderItems(ProductId);
-GO
-
--- 8) TransferOrders (header)
-CREATE TABLE dbo.TransferOrders (
-    Id               BIGINT IDENTITY(1,1) PRIMARY KEY,
-    FromWarehouseId  INT      NULL,   -- required by stock trigger (validated there)
-    ToWarehouseId    INT      NULL,   -- required by stock trigger (validated there)
-    UserId           INT      NOT NULL,
-    CreatedAt        DATETIME2(3) NOT NULL CONSTRAINT DF_TransferOrders_CreatedAt DEFAULT (SYSUTCDATETIME()),
-    CONSTRAINT FK_TransferOrders_FromWarehouse  FOREIGN KEY (FromWarehouseId) REFERENCES dbo.Warehouses(Id),
-    CONSTRAINT FK_TransferOrders_ToWarehouse    FOREIGN KEY (ToWarehouseId)   REFERENCES dbo.Warehouses(Id),
-    CONSTRAINT FK_TransferOrders_User           FOREIGN KEY (UserId)          REFERENCES dbo.Users(Id)
-);
-CREATE INDEX IX_TransferOrders_FromWarehouseId ON dbo.TransferOrders(FromWarehouseId);
-CREATE INDEX IX_TransferOrders_ToWarehouseId   ON dbo.TransferOrders(ToWarehouseId);
-CREATE INDEX IX_TransferOrders_UserId          ON dbo.TransferOrders(UserId);
-CREATE INDEX IX_TransferOrders_CreatedAt       ON dbo.TransferOrders(CreatedAt);
-GO
-
--- 8b) TransferOrderItems
-CREATE TABLE dbo.TransferOrderItems (
-    Id        BIGINT IDENTITY(1,1) PRIMARY KEY,
-    OrderId   BIGINT NOT NULL,
-    ProductId INT    NOT NULL,
-    ItemCount INT    NOT NULL,
-    CONSTRAINT CK_TransferOrderItems_ItemCount CHECK (ItemCount > 0),
-    CONSTRAINT FK_TransferOrderItems_Order   FOREIGN KEY (OrderId)   REFERENCES dbo.TransferOrders(Id) ON DELETE CASCADE,
-    CONSTRAINT FK_TransferOrderItems_Product FOREIGN KEY (ProductId) REFERENCES dbo.Products(Id)
-);
-CREATE INDEX IX_TransferOrderItems_OrderId   ON dbo.TransferOrderItems(OrderId);
-CREATE INDEX IX_TransferOrderItems_ProductId ON dbo.TransferOrderItems(ProductId);
-GO
 
 /* --------------------------
    Inventory movement logging
    -------------------------- */
 
--- 9) InventoryLog (append-only)
+-- 7) InventoryLog (append-only)
 CREATE TABLE dbo.InventoryLog (
     Id               BIGINT IDENTITY(1,1) PRIMARY KEY,
     [Timestamp]      DATETIME2(3) NOT NULL CONSTRAINT DF_InventoryLog_Timestamp DEFAULT (SYSUTCDATETIME()),
-    OrderType        CHAR(1)      NOT NULL,  -- 'S'|'R'|'T'
-    ProductId        INT          NOT NULL,
-    FromWarehouseId  INT          NULL,
-    ToWarehouseId    INT          NULL,
-    ItemCount        INT          NOT NULL,
-    UserId           INT          NOT NULL,
+    OrderType        NVARCHAR(100)      NOT NULL,  -- 'Sales'|'Return'|'Transfer'|'Purchase'
+    ProductId        INT                NOT NULL,
+    FromWarehouseId  INT                NULL,
+    ToWarehouseId    INT                NULL,
+    ItemCount        INT                NOT NULL,
+    UserId           INT                NOT NULL,
     CONSTRAINT CK_InventoryLog_ItemCount CHECK (ItemCount > 0),
-    CONSTRAINT CK_InventoryLog_OrderType CHECK (OrderType IN ('S','R','T')),
+    CONSTRAINT CK_InventoryLog_OrderType CHECK (OrderType IN ('Sales','Return','Transfer','Purchase')),
     CONSTRAINT FK_InventoryLog_Product        FOREIGN KEY (ProductId)       REFERENCES dbo.Products(Id),
     CONSTRAINT FK_InventoryLog_FromWarehouse  FOREIGN KEY (FromWarehouseId) REFERENCES dbo.Warehouses(Id),
     CONSTRAINT FK_InventoryLog_ToWarehouse    FOREIGN KEY (ToWarehouseId)   REFERENCES dbo.Warehouses(Id),
@@ -225,223 +181,176 @@ CREATE INDEX IX_InventoryLog_ProductId ON dbo.InventoryLog(ProductId);
 CREATE INDEX IX_InventoryLog_UserId    ON dbo.InventoryLog(UserId);
 GO
 
-/* -------------------------------------------------
-   Log triggers: one log row per inserted order item
-   ------------------------------------------------- */
 
--- SalesOrderItems → InventoryLog
-CREATE OR ALTER TRIGGER dbo.tr_SalesOrderItems_Log
-ON dbo.SalesOrderItems
-AFTER INSERT AS
-BEGIN
-    SET NOCOUNT ON;
-
-    INSERT dbo.InventoryLog (OrderType, ProductId, FromWarehouseId, ToWarehouseId, ItemCount, UserId)
-    SELECT
-        'S',
-        i.ProductId,
-        h.FromWarehouseId,
-        h.ToWarehouseId,
-        i.ItemCount,
-        h.UserId
-    FROM inserted i
-    JOIN dbo.SalesOrders h
-      ON h.Id = i.OrderId;
-END;
-GO
-
--- ReturnOrderItems → InventoryLog
-CREATE OR ALTER TRIGGER dbo.tr_ReturnOrderItems_Log
-ON dbo.ReturnOrderItems
-AFTER INSERT AS
-BEGIN
-    SET NOCOUNT ON;
-
-    INSERT dbo.InventoryLog (OrderType, ProductId, FromWarehouseId, ToWarehouseId, ItemCount, UserId)
-    SELECT
-        'R',
-        i.ProductId,
-        h.FromWarehouseId,
-        h.ToWarehouseId,
-        i.ItemCount,
-        h.UserId
-    FROM inserted i
-    JOIN dbo.ReturnOrders h
-      ON h.Id = i.OrderId;
-END;
-GO
-
--- TransferOrderItems → InventoryLog
-CREATE OR ALTER TRIGGER dbo.tr_TransferOrderItems_Log
-ON dbo.TransferOrderItems
-AFTER INSERT AS
-BEGIN
-    SET NOCOUNT ON;
-
-    INSERT dbo.InventoryLog (OrderType, ProductId, FromWarehouseId, ToWarehouseId, ItemCount, UserId)
-    SELECT
-        'T',
-        i.ProductId,
-        h.FromWarehouseId,
-        h.ToWarehouseId,
-        i.ItemCount,
-        h.UserId
-    FROM inserted i
-    JOIN dbo.TransferOrders h
-      ON h.Id = i.OrderId;
-END;
-GO
-
-/* ----------------------------------------------------
-   Stock triggers: keep WarehouseProducts in sync (set-based)
-   ---------------------------------------------------- */
-
--- Sales: subtract from FromWarehouseId
-IF OBJECT_ID('dbo.tr_SalesOrderItems_Stock', 'TR') IS NOT NULL
-    DROP TRIGGER dbo.tr_SalesOrderItems_Stock;
-GO
-
-CREATE TRIGGER dbo.tr_SalesOrderItems_Stock
-ON dbo.SalesOrderItems
+/* ============================================================
+   LOG trigger: one InventoryLog row per inserted OrderItems row
+   Maps Orders.OrderType ('S','R','T','P') -> NVARCHAR text.
+   ============================================================ */
+CREATE TRIGGER dbo.tr_OrderItems_Log
+ON dbo.OrderItems
 AFTER INSERT
 AS
 BEGIN
     SET NOCOUNT ON;
 
-    CREATE TABLE #req (
-        WarehouseId INT NOT NULL,
-        ProductId   INT NOT NULL,
-        Qty         INT NOT NULL
+    INSERT dbo.InventoryLog ([OrderType], ProductId, FromWarehouseId, ToWarehouseId, ItemCount, UserId)
+    SELECT
+        CASE o.OrderType
+            WHEN 'S' THEN N'Sales'
+            WHEN 'R' THEN N'Return'
+            WHEN 'T' THEN N'Transfer'
+            WHEN 'P' THEN N'Purchase'
+            ELSE N'Unknown'
+        END AS OrderTypeText,
+        i.ProductId,
+        o.FromWarehouseId,
+        o.ToWarehouseId,
+        i.ItemCount,
+        o.UserId
+    FROM inserted i
+    JOIN dbo.Orders o
+      ON o.Id = i.OrderId;
+END;
+GO
+
+/* ============================================================
+   STOCK trigger: keeps WarehouseProducts in sync (set-based)
+   Behavior per Orders.OrderType:
+     S (Sales)    : subtract from FromWarehouseId
+     R (Return)   : add to ToWarehouseId
+     T (Transfer) : subtract from FromWarehouseId, add to ToWarehouseId
+     P (Purchase) : add to ToWarehouseId
+   Validations:
+     - Required warehouse ids present depending on type
+     - S and T subtract paths must have sufficient stock
+   ============================================================ */
+CREATE TRIGGER dbo.tr_OrderItems_Stock
+ON dbo.OrderItems
+AFTER INSERT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    /* Materialize inserted rows joined to their headers once */
+    CREATE TABLE #ins (
+        OrderId          BIGINT      NOT NULL,
+        OrderType        CHAR(1)     NOT NULL, -- 'S','R','T','P'
+        FromWarehouseId  INT         NULL,
+        ToWarehouseId    INT         NULL,
+        ProductId        INT         NOT NULL,
+        Qty              INT         NOT NULL
     );
 
-    INSERT #req (WarehouseId, ProductId, Qty)
+    INSERT #ins (OrderId, OrderType, FromWarehouseId, ToWarehouseId, ProductId, Qty)
     SELECT
-        h.FromWarehouseId,
+        o.Id,
+        o.OrderType,
+        o.FromWarehouseId,
+        o.ToWarehouseId,
         i.ProductId,
-        SUM(i.ItemCount)
+        i.ItemCount
     FROM inserted i
-    JOIN dbo.SalesOrders h ON h.Id = i.OrderId
-    GROUP BY h.FromWarehouseId, i.ProductId;
+    JOIN dbo.Orders o
+      ON o.Id = i.OrderId;
 
-    IF EXISTS (SELECT 1 FROM #req WHERE WarehouseId IS NULL)
-        THROW 51001, 'SalesOrderItems requires SalesOrders.FromWarehouseId (cannot be NULL).', 1;
+    /* Aggregate per (warehouse, product) for each flow */
+    CREATE TABLE #salesSub    (WarehouseId INT NOT NULL, ProductId INT NOT NULL, Qty INT NOT NULL);
+    CREATE TABLE #returnAdd   (WarehouseId INT NOT NULL, ProductId INT NOT NULL, Qty INT NOT NULL);
+    CREATE TABLE #transferSub (WarehouseId INT NOT NULL, ProductId INT NOT NULL, Qty INT NOT NULL);
+    CREATE TABLE #transferAdd (WarehouseId INT NOT NULL, ProductId INT NOT NULL, Qty INT NOT NULL);
+    CREATE TABLE #purchaseAdd (WarehouseId INT NOT NULL, ProductId INT NOT NULL, Qty INT NOT NULL);
+
+    INSERT #salesSub (WarehouseId, ProductId, Qty)
+    SELECT FromWarehouseId, ProductId, SUM(Qty)
+    FROM #ins WHERE OrderType = 'S'
+    GROUP BY FromWarehouseId, ProductId;
+
+    INSERT #returnAdd (WarehouseId, ProductId, Qty)
+    SELECT ToWarehouseId, ProductId, SUM(Qty)
+    FROM #ins WHERE OrderType = 'R'
+    GROUP BY ToWarehouseId, ProductId;
+
+    INSERT #transferSub (WarehouseId, ProductId, Qty)
+    SELECT FromWarehouseId, ProductId, SUM(Qty)
+    FROM #ins WHERE OrderType = 'T'
+    GROUP BY FromWarehouseId, ProductId;
+
+    INSERT #transferAdd (WarehouseId, ProductId, Qty)
+    SELECT ToWarehouseId, ProductId, SUM(Qty)
+    FROM #ins WHERE OrderType = 'T'
+    GROUP BY ToWarehouseId, ProductId;
+
+    INSERT #purchaseAdd (WarehouseId, ProductId, Qty)
+    SELECT ToWarehouseId, ProductId, SUM(Qty)
+    FROM #ins WHERE OrderType = 'P'
+    GROUP BY ToWarehouseId, ProductId;
+
+    /* ---- Required warehouse validations ---- */
+    IF EXISTS (SELECT 1 FROM #salesSub    WHERE WarehouseId IS NULL)
+        THROW 54101, 'Sales requires Orders.FromWarehouseId (cannot be NULL).', 1;
+
+    IF EXISTS (SELECT 1 FROM #returnAdd   WHERE WarehouseId IS NULL)
+        THROW 54201, 'Return requires Orders.ToWarehouseId (cannot be NULL).', 1;
+
+    IF EXISTS (SELECT 1 FROM #transferSub WHERE WarehouseId IS NULL)
+        THROW 54301, 'Transfer requires Orders.FromWarehouseId (cannot be NULL).', 1;
+
+    IF EXISTS (SELECT 1 FROM #transferAdd WHERE WarehouseId IS NULL)
+        THROW 54302, 'Transfer requires Orders.ToWarehouseId (cannot be NULL).', 1;
+
+    IF EXISTS (SELECT 1 FROM #purchaseAdd WHERE WarehouseId IS NULL)
+        THROW 54401, 'Purchase requires Orders.ToWarehouseId (cannot be NULL).', 1;
+
+    /* ---- Stock sufficiency for subtract paths (Sales, Transfer-from) ---- */
+    IF EXISTS (
+        SELECT 1
+        FROM #salesSub s
+        LEFT JOIN dbo.WarehouseProducts wp
+          ON wp.WarehouseId = s.WarehouseId AND wp.ProductId = s.ProductId
+        WHERE wp.Id IS NULL OR wp.Quantity < s.Qty
+    )
+        THROW 54102, 'Insufficient stock for Sales.', 1;
 
     IF EXISTS (
         SELECT 1
-        FROM #req r
+        FROM #transferSub t
         LEFT JOIN dbo.WarehouseProducts wp
-          ON wp.WarehouseId = r.WarehouseId AND wp.ProductId = r.ProductId
-        WHERE wp.Id IS NULL OR wp.Quantity < r.Qty
+          ON wp.WarehouseId = t.WarehouseId AND wp.ProductId = t.ProductId
+        WHERE wp.Id IS NULL OR wp.Quantity < t.Qty
     )
-        THROW 51002, 'Insufficient stock for SalesOrderItems.', 1;
+        THROW 54303, 'Insufficient stock for Transfer (source warehouse).', 1;
+
+    /* ---- Apply subtract updates ---- */
+    UPDATE wp
+    SET wp.Quantity = wp.Quantity - s.Qty
+    FROM dbo.WarehouseProducts wp
+    JOIN #salesSub s
+      ON s.WarehouseId = wp.WarehouseId AND s.ProductId = wp.ProductId;
 
     UPDATE wp
-    SET wp.Quantity = wp.Quantity - r.Qty
+    SET wp.Quantity = wp.Quantity - t.Qty
     FROM dbo.WarehouseProducts wp
-    JOIN #req r ON r.WarehouseId = wp.WarehouseId AND r.ProductId = wp.ProductId;
-END;
-GO
+    JOIN #transferSub t
+      ON t.WarehouseId = wp.WarehouseId AND t.ProductId = wp.ProductId;
 
--- Return: add to ToWarehouseId (upsert)
-IF OBJECT_ID('dbo.tr_ReturnOrderItems_Stock', 'TR') IS NOT NULL
-    DROP TRIGGER dbo.tr_ReturnOrderItems_Stock;
-GO
+    /* ---- Apply add/upsert updates (Return, Transfer-to, Purchase) ---- */
+    MERGE dbo.WarehouseProducts WITH (HOLDLOCK) AS tgt
+    USING #returnAdd AS src
+      ON tgt.WarehouseId = src.WarehouseId AND tgt.ProductId = src.ProductId
+    WHEN MATCHED THEN UPDATE SET Quantity = tgt.Quantity + src.Qty
+    WHEN NOT MATCHED THEN INSERT (WarehouseId, ProductId, Quantity) VALUES (src.WarehouseId, src.ProductId, src.Qty);
 
-CREATE TRIGGER dbo.tr_ReturnOrderItems_Stock
-ON dbo.ReturnOrderItems
-AFTER INSERT
-AS
-BEGIN
-    SET NOCOUNT ON;
+    MERGE dbo.WarehouseProducts WITH (HOLDLOCK) AS tgt
+    USING #transferAdd AS src
+      ON tgt.WarehouseId = src.WarehouseId AND tgt.ProductId = src.ProductId
+    WHEN MATCHED THEN UPDATE SET Quantity = tgt.Quantity + src.Qty
+    WHEN NOT MATCHED THEN INSERT (WarehouseId, ProductId, Quantity) VALUES (src.WarehouseId, src.ProductId, src.Qty);
 
-    CREATE TABLE #adds (
-        WarehouseId INT NOT NULL,
-        ProductId   INT NOT NULL,
-        Qty         INT NOT NULL
-    );
-
-    INSERT #adds (WarehouseId, ProductId, Qty)
-    SELECT
-        h.ToWarehouseId,
-        i.ProductId,
-        SUM(i.ItemCount)
-    FROM inserted i
-    JOIN dbo.ReturnOrders h ON h.Id = i.OrderId
-    GROUP BY h.ToWarehouseId, i.ProductId;
-
-    IF EXISTS (SELECT 1 FROM #adds WHERE WarehouseId IS NULL)
-        THROW 52001, 'ReturnOrderItems requires ReturnOrders.ToWarehouseId (cannot be NULL).', 1;
-
-    MERGE dbo.WarehouseProducts WITH (HOLDLOCK) AS t
-    USING #adds AS s
-      ON t.WarehouseId = s.WarehouseId AND t.ProductId = s.ProductId
-    WHEN MATCHED THEN
-      UPDATE SET Quantity = t.Quantity + s.Qty
-    WHEN NOT MATCHED THEN
-      INSERT (WarehouseId, ProductId, Quantity) VALUES (s.WarehouseId, s.ProductId, s.Qty);
-END;
-GO
-
--- Transfer: move FromWarehouseId → ToWarehouseId
-IF OBJECT_ID('dbo.tr_TransferOrderItems_Stock', 'TR') IS NOT NULL
-    DROP TRIGGER dbo.tr_TransferOrderItems_Stock;
-GO
-
-CREATE TRIGGER dbo.tr_TransferOrderItems_Stock
-ON dbo.TransferOrderItems
-AFTER INSERT
-AS
-BEGIN
-    SET NOCOUNT ON;
-
-    CREATE TABLE #mov (
-        FromWarehouseId INT NOT NULL,
-        ToWarehouseId   INT NOT NULL,
-        ProductId       INT NOT NULL,
-        Qty             INT NOT NULL
-    );
-
-    INSERT #mov (FromWarehouseId, ToWarehouseId, ProductId, Qty)
-    SELECT
-        h.FromWarehouseId,
-        h.ToWarehouseId,
-        i.ProductId,
-        SUM(i.ItemCount)
-    FROM inserted i
-    JOIN dbo.TransferOrders h ON h.Id = i.OrderId
-    GROUP BY h.FromWarehouseId, h.ToWarehouseId, i.ProductId;
-
-    IF EXISTS (SELECT 1 FROM #mov WHERE FromWarehouseId IS NULL OR ToWarehouseId IS NULL)
-        THROW 53001, 'TransferOrderItems requires both FromWarehouseId and ToWarehouseId.', 1;
-
-    IF EXISTS (SELECT 1 FROM #mov WHERE FromWarehouseId = ToWarehouseId)
-        THROW 53002, 'TransferOrderItems FromWarehouseId and ToWarehouseId cannot be the same.', 1;
-
-    IF EXISTS (
-        SELECT 1
-        FROM #mov m
-        LEFT JOIN dbo.WarehouseProducts wp
-          ON wp.WarehouseId = m.FromWarehouseId AND wp.ProductId = m.ProductId
-        WHERE wp.Id IS NULL OR wp.Quantity < m.Qty
-    )
-        THROW 53003, 'Insufficient stock in source warehouse for TransferOrderItems.', 1;
-
-    -- subtract from source
-    UPDATE wp
-    SET wp.Quantity = wp.Quantity - m.Qty
-    FROM dbo.WarehouseProducts wp
-    JOIN #mov m ON m.FromWarehouseId = wp.WarehouseId AND m.ProductId = wp.ProductId;
-
-    -- add to destination (upsert)
-    MERGE dbo.WarehouseProducts WITH (HOLDLOCK) AS t
-    USING (
-        SELECT ToWarehouseId AS WarehouseId, ProductId, Qty FROM #mov
-    ) AS s
-      ON t.WarehouseId = s.WarehouseId AND t.ProductId = s.ProductId
-    WHEN MATCHED THEN
-      UPDATE SET Quantity = t.Quantity + s.Qty
-    WHEN NOT MATCHED THEN
-      INSERT (WarehouseId, ProductId, Quantity) VALUES (s.WarehouseId, s.ProductId, s.Qty);
+    MERGE dbo.WarehouseProducts WITH (HOLDLOCK) AS tgt
+    USING #purchaseAdd AS src
+      ON tgt.WarehouseId = src.WarehouseId AND tgt.ProductId = src.ProductId
+    WHEN MATCHED THEN UPDATE SET Quantity = tgt.Quantity + src.Qty
+    WHEN NOT MATCHED THEN INSERT (WarehouseId, ProductId, Quantity) VALUES (src.WarehouseId, src.ProductId, src.Qty);
 END;
 GO
 
