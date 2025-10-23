@@ -184,7 +184,6 @@ GO
 
 /* ============================================================
    LOG trigger: one InventoryLog row per inserted OrderItems row
-   Maps Orders.OrderType ('S','R','T','P') -> NVARCHAR text.
    ============================================================ */
 CREATE TRIGGER dbo.tr_OrderItems_Log
 ON dbo.OrderItems
@@ -195,13 +194,7 @@ BEGIN
 
     INSERT dbo.InventoryLog ([OrderType], ProductId, FromWarehouseId, ToWarehouseId, ItemCount, UserId)
     SELECT
-        CASE o.OrderType
-            WHEN 'S' THEN N'Sales'
-            WHEN 'R' THEN N'Return'
-            WHEN 'T' THEN N'Transfer'
-            WHEN 'P' THEN N'Purchase'
-            ELSE N'Unknown'
-        END AS OrderTypeText,
+        o.OrderType,
         i.ProductId,
         o.FromWarehouseId,
         o.ToWarehouseId,
@@ -234,7 +227,7 @@ BEGIN
     /* Materialize inserted rows joined to their headers once */
     CREATE TABLE #ins (
         OrderId          BIGINT      NOT NULL,
-        OrderType        CHAR(1)     NOT NULL, -- 'S','R','T','P'
+        OrderType        NVARCHAR(100)    NOT NULL,
         FromWarehouseId  INT         NULL,
         ToWarehouseId    INT         NULL,
         ProductId        INT         NOT NULL,

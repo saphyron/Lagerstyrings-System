@@ -69,8 +69,8 @@ namespace LagerstyringsSystem.Orders
             {
                 refund += item.Price * item.Quantity;
             }
-            
-            return refund
+
+            return refund;
         }
         
         public string GetOrderDetails()
