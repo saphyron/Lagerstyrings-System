@@ -96,6 +96,7 @@ namespace Lagerstyrings_System
         public int Id { get; set; }
         public string Name { get; set; }
         public ProductTypeEnum ProductType { get; set; }
+        public Product() {}
 
         public Product(string name, ProductTypeEnum productType)
         {
