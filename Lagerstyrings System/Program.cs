@@ -3,11 +3,19 @@ using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
+using LagerstyringsSystem.Endpoints;
+using LagerstyringsSystem.Orders;
+using Lagerstyrings_System;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Connection factory
 builder.Services.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
+
+// Repositories
+builder.Services.AddScoped<OrderRepository>();
+builder.Services.AddScoped<OrderItemRepository>();
+builder.Services.AddScoped<WarehouseRepository>();
 
 // JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key missing");
@@ -39,6 +47,9 @@ app.UseAuthorization();
 // Map endpoints
 app.MapUserEndpoints();
 app.MapAuthEndpoints();
+app.MapOrderEndpoints();
+app.MapOrderItemEndpoints();
+app.MapWarehouseEndpoints();
 
 app.MapGet("/", () => Results.Ok(new { ok = true, service = "Lagerstyrings System API" }));
 

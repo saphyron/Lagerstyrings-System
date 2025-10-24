@@ -5,17 +5,39 @@ using Microsoft.Data.SqlClient;
 using Xunit;
 
 namespace Tests.Spectests;
-
+/// <summary>
+/// Contract tests for Orders and Inventory operations.
+/// </summary>
+/// <remarks>
+/// These tests verify that the Orders and Inventory services correctly handle
+/// various scenarios related to order processing and inventory management.
+/// </remarks>
 public class OrdersInventoryContractTests
 {
+    /// <summary>
+    /// Creates an appropriate Orders invoker (HTTP or CLI) based on environment configuration.
+    /// </summary>
+    /// <returns>>An instance of <see cref="IOrdersInvoker"/>.</returns>
+    /// <remarks>
+    /// This method uses the <see cref="OrdersInvoker.Detect"/> method to determine
+    /// the correct invoker implementation based on environment variables.
+    /// </remarks>
     private static IOrdersInvoker CreateInvoker() => OrdersInvoker.Detect();
-
+    /// <summary>
+    /// Test that sales orders decrease stock levels and write inventory logs.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <remarks>
+    /// This test verifies that when a sales order is created, the stock levels for the ordered items
+    /// are decreased accordingly, and inventory logs are written for each item.
+    /// </remarks>
     [Fact(DisplayName = "Sales: stock decreases per item and one log row per item")]
     public async Task Sales_DecreasesStock_And_WritesLogs()
     {
         var invoker = CreateInvoker();
 
         int userId, wMain, p1, p2;
+        // Seed user, warehouse, products, stock
         using (var conn = await Database.OpenAsync())
         {
             userId = await conn.ExecuteScalarAsync<int>(
@@ -42,7 +64,7 @@ WHEN NOT MATCHED THEN INSERT (WarehouseId,ProductId,Quantity) VALUES (s.Warehous
         long orderId = -1;
         try
         {
-            // Call THEIR code via adapter (HTTP or CLI)
+            // Create sales order for 2xP1 and 1xP2
             var payload = $$"""
             {
               "orderType": "S",
@@ -55,9 +77,9 @@ WHEN NOT MATCHED THEN INSERT (WarehouseId,ProductId,Quantity) VALUES (s.Warehous
               ]
             }
             """;
-
+            // Create order via invoker
             orderId = await invoker.CreateOrderAsync(payload);
-
+            // Verify stock levels and logs
             using var conn = await Database.OpenAsync();
             var q1 = await conn.ExecuteScalarAsync<int>(
                 "SELECT Quantity FROM dbo.WarehouseProducts WHERE WarehouseId=@W AND ProductId=@P", new { W = wMain, P = p1 });
@@ -85,13 +107,21 @@ WHEN NOT MATCHED THEN INSERT (WarehouseId,ProductId,Quantity) VALUES (s.Warehous
             await conn.ExecuteAsync("DELETE FROM dbo.Users WHERE Id=@U", new { U = userId });
         }
     }
-
+    /// <summary>
+    /// Test that sales orders with insufficient stock fail and do not change inventory.
+    /// </summary>
+    /// <returns>A task that represents the asynchronous operation.</returns>
+    /// <remarks>
+    /// This test verifies that when a sales order is created with item quantities exceeding available stock,
+    /// the order is rejected and no inventory changes are made.
+    /// </remarks>
     [Fact(DisplayName = "Sales with insufficient stock should return error and change nothing")]
     public async Task Sales_InsufficientStock_FailsAndNoChange()
     {
         var invoker = CreateInvoker();
 
         int userId, wMain, p1;
+        // Seed user, warehouse, product (no stock)
         using (var conn = await Database.OpenAsync())
         {
             userId = await conn.ExecuteScalarAsync<int>(
@@ -102,7 +132,7 @@ WHEN NOT MATCHED THEN INSERT (WarehouseId,ProductId,Quantity) VALUES (s.Warehous
                 "INSERT INTO dbo.Products(Name,[Type]) VALUES (N'__P1__',N'A'); SELECT CAST(SCOPE_IDENTITY() AS int);");
             // note: no stock seeded intentionally
         }
-
+        // Create sales order for 9999xP1 (exceeds stock)
         var payload = $$"""
         {
           "orderType": "S",
