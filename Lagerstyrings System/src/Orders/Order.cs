@@ -82,15 +82,20 @@ namespace LagerstyringsSystem.Orders
         //private readonly OrderRepository _orderRepository;
 
         public int Id { get; set; }
-        public int FromWarehouseId { get; set; }
-        public int ToWarehouseId { get; set; }
+        //public int FromWarehouseId { get; set; }
+        public int? FromWarehouseId { get; set; }
+        //public int ToWarehouseId { get; set; }
+        public int? ToWarehouseId { get; set; }
         public int UserId { get; set; }
-        public string OrderType { get; set; }
+        //public string OrderType { get; set; }
+        public string OrderType { get; set; } = string.Empty;
         public DateTime CreatedAt { get; set; }
         
         public Warehouse? FromWarehouse { get; set; }
         public Warehouse? ToWarehouse { get; set; }
-        public List<OrderItem> Items { get; set; }
+        //public List<OrderItem> Items { get; set; }
+        public List<OrderItem> Items { get; set; } = new List<OrderItem>();
+        public Order() {}
 
         public Order(int fromWarehouseId, int toWarehouseId, int userId, string orderType, DateTime createdAt)
         {
