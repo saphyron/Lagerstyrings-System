@@ -1,6 +1,7 @@
 using LagerstyringsSystem.Database;
-using LagerstyringsSystem.Endpoints; 
-using LagerstyringsSystem.Orders; 
+using LagerstyringsSystem.Endpoints;
+using LagerstyringsSystem.Orders;
+using Lagerstyrings_System;
 using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
