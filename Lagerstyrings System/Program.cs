@@ -14,6 +14,7 @@ builder.Services.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
 
 builder.Services.AddScoped<OrderRepository>();
 builder.Services.AddScoped<OrderItemRepository>();
+builder.Services.AddScoped<WarehouseRepository>();
 
 // JWT Authentication
 var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key missing");
@@ -47,6 +48,7 @@ app.MapUserEndpoints();
 app.MapAuthEndpoints();
 app.MapOrderEndpoints();
 app.MapOrderItemEndpoints();
+app.MapWarehouseEndpoints();
 
 app.MapGet("/", () => Results.Ok(new { ok = true, service = "Lagerstyrings System API" }));
 
