@@ -12,6 +12,7 @@ var builder = WebApplication.CreateBuilder(args);
 // Connection factory
 builder.Services.AddSingleton<ISqlConnectionFactory, SqlConnectionFactory>();
 
+// Repositories
 builder.Services.AddScoped<OrderRepository>();
 builder.Services.AddScoped<OrderItemRepository>();
 builder.Services.AddScoped<WarehouseRepository>();

@@ -118,6 +118,7 @@ namespace Lagerstyrings_System
 
         public Warehouse? Warehouse { get; set; }
         public Product? Product { get; set; }
+        public WarehouseProduct() { }
 
         public WarehouseProduct(int warehouseId, int productId, int quantity)
         {

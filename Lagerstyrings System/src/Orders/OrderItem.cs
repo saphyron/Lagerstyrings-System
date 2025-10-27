@@ -93,6 +93,7 @@ namespace LagerstyringsSystem.Orders
         public int OrderId { get; set; }
         public int ProductId { get; set; }
         public int ItemCount { get; set; }
+        public OrderItem() {}
 
         public OrderItem(int orderId, int productId, int itemCount)
         {
