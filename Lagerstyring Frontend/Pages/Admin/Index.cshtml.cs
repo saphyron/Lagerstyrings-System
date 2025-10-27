@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 
-namespace Lagerstyring.Pages.Admin;
+namespace LagerstyringFrontend.Pages.Admin;
 
 [Authorize]
 public class AdminIndexModel : PageModel

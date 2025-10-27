@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Authorization;
 
-namespace Lagerstyring.Pages.Account;
+namespace LagerstyringFrontend.Pages.Account;
 
 [AllowAnonymous]
 public class LoginModel : PageModel

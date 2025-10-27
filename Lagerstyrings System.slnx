@@ -1,4 +1,4 @@
 <Solution>
-  <Project Path="Lagerstyring/Lagerstyring.csproj" />
+  <Project Path="Lagerstyring Frontend/Lagerstyring Frontend.csproj" />
   <Project Path="Lagerstyrings System/Lagerstyrings System.csproj" />
 </Solution>
