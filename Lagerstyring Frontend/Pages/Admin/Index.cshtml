@@ -1,0 +1,12 @@
+@page
+@model LagerstyringFrontend.Pages.Admin.AdminIndexModel
+@{
+    ViewData["Title"] = "Admin";
+}
+<h1>Admin</h1>
+<p>Logget ind som: <strong>@Model.DisplayName</strong></p>
+
+<form method="post" asp-page="/Account/Logout" class="mt-3">
+  <button class="btn btn-outline-danger">Logout</button>
+</form>
+
