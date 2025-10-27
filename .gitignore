@@ -8,6 +8,9 @@
 *.obj
 Lagerstyrings System/obj/
 Lagerstyrings System/bin/
+Lagerstyring/obj/
+Lagerstyring/bin/
+Lagerstyring/wwwroot/
 
 # Precompiled Headers
 *.gch
