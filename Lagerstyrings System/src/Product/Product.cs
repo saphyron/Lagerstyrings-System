@@ -49,17 +49,6 @@ namespace Lagerstyrings_System
             return products;
         }
 
-        public async Task<Product?> GetProductByNameAsync(string name)
-        {
-            var sql = "SELECT * FROM dbo.Products WHERE Name = @name;";
-
-            using var conn = _factory.Create();
-            conn.Open();
-
-            var product = await conn.QuerySingleOrDefaultAsync<Product>(sql, new { name });
-            return product;
-        }
-
         public async Task<bool> UpdateProductAsync(Product product)
         {
             var sql = @"
