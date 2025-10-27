@@ -20,13 +20,21 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        var client = _factory.CreateClient("Self");
+        var client = _factory.CreateClient("Api");
 
         var resp = await client.PostAsJsonAsync("/auth/users/login", new { username = Username, password = Password });
 
+
+        if (resp is null)
+        {
+            Error = "error: <null response>";
+            return Page();
+        }
+
         if (!resp.IsSuccessStatusCode)
         {
-            Error = "Login mislykkedes.";
+            var body = await resp.Content.ReadAsStringAsync();
+            Error = $"error: {(int)resp.StatusCode} {resp.ReasonPhrase} - {body}";
             return Page();
         }
 
@@ -39,10 +47,11 @@ public class LoginModel : PageModel
                 var token = tokenProp.GetString();
                 if (!string.IsNullOrWhiteSpace(token))
                 {
+                    var secure = Request.IsHttps;
                     Response.Cookies.Append("AuthToken", token!, new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = true,
+                        Secure = secure,
                         SameSite = SameSiteMode.Strict,
                         Path = "/"
                     });

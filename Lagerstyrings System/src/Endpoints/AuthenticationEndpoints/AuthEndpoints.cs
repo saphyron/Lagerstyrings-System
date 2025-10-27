@@ -97,11 +97,9 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     {
                         var sql = "INSERT INTO dbo.AuthRoles (AuthEnum, Name) VALUES (@AuthEnum, @Name);";
                         await conn.ExecuteAsync(sql, body);
-                        // Return the created representation
                         var dto = new AuthRoleDto { AuthEnum = body.AuthEnum, Name = body.Name };
                         return TypedResults.Created($"/auth/roles/{body.AuthEnum}", dto);
                     }
-                    // Unique constraint violations (PK/UNIQUE index) map to 2627/2601 in SQL Server
                     catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number is 2627 or 2601)
                     {
                         return TypedResults.Conflict("AuthEnum or Name already exists.");
@@ -134,7 +132,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
 
                     using var conn = factory.Create();
                     conn.Open();
-                    // Check existence to return 404 if missing (avoid misleading 204 on non-existing keys)
+
                     var exists = await conn.ExecuteScalarAsync<int>(
                         "SELECT COUNT(1) FROM dbo.AuthRoles WHERE AuthEnum = @authEnum;", new { authEnum });
                     if (exists == 0) return TypedResults.NotFound();
@@ -179,7 +177,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                             "DELETE FROM dbo.AuthRoles WHERE AuthEnum = @authEnum;", new { authEnum });
                         return affected == 0 ? TypedResults.NotFound() : TypedResults.NoContent();
                     }
-                    catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 547) // FK violation (Users -> AuthRoles)
+                    catch (Microsoft.Data.SqlClient.SqlException ex) when (ex.Number == 547)
                     {
                         return TypedResults.Conflict("Cannot delete role: users reference this AuthEnum.");
                     }
@@ -204,7 +202,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
         /// </summary>
         public sealed class CreateRoleRequest
         {
-            public byte AuthEnum { get; set; } // 0..255
+            public byte AuthEnum { get; set; }
             public string Name { get; set; } = string.Empty;
         }
         /// <summary>

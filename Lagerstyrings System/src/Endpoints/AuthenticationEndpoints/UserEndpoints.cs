@@ -56,7 +56,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     // Fetch user (PasswordClear ONLY used here for test login)
                     // In production, use hashed passwords and secure verification!
                     var user = await conn.QuerySingleOrDefaultAsync<UserAuthRow>(
-                        @"SELECT Id, Username, PasswordClear, AuthEnum
+                        @"SELECT Id, Username, PasswordClear, AuthEnum, WarehouseId
                           FROM dbo.Users
                           WHERE Username = @Username;",
                         new { body.Username });
@@ -68,7 +68,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     var response = new LoginResponse
                     {
                         Token = token,
-                        User = new UserSummary { Id = user.Id, Username = user.Username, AuthEnum = user.AuthEnum }
+                        User = new UserSummary { Id = user.Id, Username = user.Username, AuthEnum = user.AuthEnum, WarehouseId = user.WarehouseId }
                     };
                     return TypedResults.Ok(response);
                 })
@@ -90,7 +90,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                 {
                     using var conn = factory.Create();
                     conn.Open();
-                    var sql = @"SELECT Id, Username, AuthEnum FROM dbo.Users ORDER BY Id;";
+                    var sql = @"SELECT Id, Username, AuthEnum, WarehouseId FROM dbo.Users ORDER BY Id;";
                     var users = await conn.QueryAsync<PublicUserDto>(sql);
                     return Results.Ok(users);
                 });
@@ -113,7 +113,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                 {
                     using var conn = factory.Create();
                     conn.Open();
-                    var sql = @"SELECT Id, Username, AuthEnum FROM dbo.Users WHERE Id = @id;";
+                    var sql = @"SELECT Id, Username, AuthEnum, WarehouseId FROM dbo.Users WHERE Id = @id;";
                     var user = await conn.QuerySingleOrDefaultAsync<PublicUserDto>(sql, new { id });
                     return user is null ? TypedResults.NotFound() : TypedResults.Ok(user);
                 });
@@ -142,12 +142,12 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     try
                     {
                         var sql = @"
-                            INSERT INTO dbo.Users (Username, PasswordClear, AuthEnum)
-                            VALUES (@Username, @PasswordClear, @AuthEnum);
+                            INSERT INTO dbo.Users (Username, PasswordClear, AuthEnum, WarehouseId)
+                            VALUES (@Username, @PasswordClear, @AuthEnum, @WarehouseId);
                             SELECT CAST(SCOPE_IDENTITY() AS int);";
                         // Get the new user ID
                         var newId = await conn.ExecuteScalarAsync<int>(sql, body);
-                        var created = new PublicUserDto { Id = newId, Username = body.Username, AuthEnum = body.AuthEnum };
+                        var created = new PublicUserDto { Id = newId, Username = body.Username, AuthEnum = body.AuthEnum, WarehouseId = body.WarehouseId };
                         return TypedResults.Created($"/auth/users/{newId}", created);
                     }
                     /// <remarks>
@@ -192,9 +192,10 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                             UPDATE dbo.Users
                             SET Username = @Username,
                                 PasswordClear = @PasswordClear,
-                                AuthEnum = @AuthEnum
+                                AuthEnum = @AuthEnum,
+                                WarehouseId = @WarehouseId
                             WHERE Id = @Id;";
-                        await conn.ExecuteAsync(sql, new { Id = id, body.Username, body.PasswordClear, body.AuthEnum });
+                        await conn.ExecuteAsync(sql, new { Id = id, body.Username, body.PasswordClear, body.AuthEnum, body.WarehouseId });
                         return TypedResults.NoContent();
                     }
                     /// <remarks>
@@ -242,6 +243,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
             public int Id { get; set; }
             public string Username { get; set; } = string.Empty;
             public byte AuthEnum { get; set; }
+            public int? WarehouseId { get; set; }
         }
 
         /// <summary>
@@ -251,8 +253,9 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
         {
             public int Id { get; set; }
             public string Username { get; set; } = string.Empty;
-            public string PasswordClear { get; set; } = string.Empty; // test only
+            public string PasswordClear { get; set; } = string.Empty;
             public byte AuthEnum { get; set; }
+            public int? WarehouseId { get; set; }
         }
         /// <summary>
         /// Request model for creating a new user.
@@ -260,8 +263,9 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
         public sealed class CreateUserRequest
         {
             public string Username { get; set; } = string.Empty;
-            public string PasswordClear { get; set; } = string.Empty; // test only
+            public string PasswordClear { get; set; } = string.Empty;
             public byte AuthEnum { get; set; }
+            public int? WarehouseId { get; set; }
         }
         /// <summary>
         /// Request model for updating an existing user.
@@ -269,8 +273,9 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
         public sealed class UpdateUserRequest
         {
             public string Username { get; set; } = string.Empty;
-            public string PasswordClear { get; set; } = string.Empty; // test only
+            public string PasswordClear { get; set; } = string.Empty;
             public byte AuthEnum { get; set; }
+            public int? WarehouseId { get; set; }
         }
         /// <summary>
         /// Request model for user login.
@@ -280,12 +285,15 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
             public string Username { get; set; } = string.Empty;
             public string Password { get; set; } = string.Empty;
         }
-
+        /// <summary>
+        /// Summary of user data returned upon successful login.
+        /// </summary>
         public sealed class UserSummary
         {
             public int Id { get; set; }
             public string Username { get; set; } = string.Empty;
             public byte AuthEnum { get; set; }
+            public int? WarehouseId { get; set; }
         }
         /// <summary>
         /// Response model for successful login, containing JWT token and user summary.
@@ -366,7 +374,8 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
             {
                 new(JwtRegisteredClaimNames.Sub, user.Id.ToString()),
                 new(JwtRegisteredClaimNames.UniqueName, user.Username),
-                new("auth", user.AuthEnum.ToString())
+                new("auth", user.AuthEnum.ToString()),
+                new("wh", user.WarehouseId?.ToString() ?? "")
             };
             // Create the JWT token
             var token = new JwtSecurityToken(
