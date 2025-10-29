@@ -6,6 +6,8 @@ using LagerstyringsSystem.Database;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.IdentityModel.Tokens;
 
+// todo: fix authorization issues later - for now, allow anonymous access to all endpoints
+
 namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
 {
     /// <summary>
@@ -93,7 +95,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     var sql = @"SELECT Id, Username, AuthEnum, WarehouseId FROM dbo.Users ORDER BY Id;";
                     var users = await conn.QueryAsync<PublicUserDto>(sql);
                     return Results.Ok(users);
-                });
+                }).AllowAnonymous();
 
             // ------------------------
             // GET /auth/users/{id}
@@ -116,7 +118,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     var sql = @"SELECT Id, Username, AuthEnum, WarehouseId FROM dbo.Users WHERE Id = @id;";
                     var user = await conn.QuerySingleOrDefaultAsync<PublicUserDto>(sql, new { id });
                     return user is null ? TypedResults.NotFound() : TypedResults.Ok(user);
-                });
+                }).AllowAnonymous();
 
             // ------------------------
             // POST /auth/users
@@ -157,7 +159,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     {
                         return TypedResults.Conflict("Username already exists.");
                     }
-                });
+                }).AllowAnonymous();
 
             // ------------------------
             // PUT /auth/users/{id}
@@ -205,7 +207,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     {
                         return TypedResults.Conflict("Username already exists.");
                     }
-                });
+                }).AllowAnonymous();
 
             // ------------------------
             // DELETE /auth/users/{id}
@@ -226,7 +228,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     conn.Open();
                     var affected = await conn.ExecuteAsync("DELETE FROM dbo.Users WHERE Id = @id;", new { id });
                     return affected == 0 ? TypedResults.NotFound() : TypedResults.NoContent();
-                });
+                }).AllowAnonymous();
 
             return group;
         }

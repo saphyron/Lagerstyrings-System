@@ -2,6 +2,8 @@ using Dapper;
 using LagerstyringsSystem.Database;
 using Microsoft.AspNetCore.Http.HttpResults;
 
+// todo: fix authorization issues later - for now, allow anonymous access to all endpoints
+
 namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
 {
     /// <summary>
@@ -46,7 +48,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     var roles = await conn.QueryAsync<AuthRoleDto>(
                         "SELECT AuthEnum, Name FROM dbo.AuthRoles ORDER BY AuthEnum;");
                     return Results.Ok(roles);
-                });
+                }).AllowAnonymous();
 
             // -------------------------------
             // GET /auth/roles/{authEnum}
@@ -67,7 +69,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     var role = await conn.QuerySingleOrDefaultAsync<AuthRoleDto>(
                         "SELECT AuthEnum, Name FROM dbo.AuthRoles WHERE AuthEnum = @authEnum;", new { authEnum });
                     return role is null ? TypedResults.NotFound() : TypedResults.Ok(role);
-                });
+                }).AllowAnonymous();
 
             // -------------------------------
             // POST /auth/roles
@@ -104,7 +106,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     {
                         return TypedResults.Conflict("AuthEnum or Name already exists.");
                     }
-                });
+                }).AllowAnonymous();
 
             // -------------------------------
             // PUT /auth/roles/{authEnum}
@@ -147,7 +149,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     {
                         return TypedResults.Conflict("Role name already exists.");
                     }
-                });
+                }).AllowAnonymous();
 
             // -------------------------------
             // DELETE /auth/roles/{authEnum}
@@ -181,7 +183,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     {
                         return TypedResults.Conflict("Cannot delete role: users reference this AuthEnum.");
                     }
-                });
+                }).AllowAnonymous();
 
             return group;
         }

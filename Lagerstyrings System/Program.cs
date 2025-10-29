@@ -24,6 +24,17 @@ var jwtKey = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationExcep
 var jwtIssuer = builder.Configuration["Jwt:Issuer"] ?? "LSS";
 var jwtAudience = builder.Configuration["Jwt:Audience"] ?? jwtIssuer;
 
+/*static string KeyFingerprint(string key)
+{
+    using var sha = System.Security.Cryptography.SHA256.Create();
+    var bytes = Encoding.UTF8.GetBytes(key);
+    var hash = sha.ComputeHash(bytes);
+    return Convert.ToHexString(hash); // f.eks. "A1B2C3..."
+}*/ // Dev: brugbar til debugging af nøgler
+
+//Console.WriteLine($"JWT Key SHA256 (backend):  {KeyFingerprint(jwtKey)}"); // dev debugging
+
+
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>

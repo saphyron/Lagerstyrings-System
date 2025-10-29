@@ -11,6 +11,7 @@ namespace Lagerstyrings_System
         public ProductRepository(ISqlConnectionFactory factory)
         => _factory = factory;
 
+        //todo: fix productenumtype mapping in dapper. Currently not working as intended.
         public async Task<int> CreateProductAsync(Product product)
         {
             var sql = @"

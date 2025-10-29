@@ -5,7 +5,7 @@
     powershell -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Tests.ps1
     powershell -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Tests.ps1 -OrdersUrl "http://localhost:5107" -CatalogUrl "http://localhost:5107"
     powershell -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Tests.ps1 -AuthUrl "http://localhost:5107"
-    powershell -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Tests.ps1 -OrdersCli "C:\path\orders-cli.exe"
+    powershell -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Tests.ps1 -Smoke
 #>
 
 param(
@@ -16,7 +16,8 @@ param(
   [string]$ProductsUrl  = "http://localhost:5107",
   [string]$AuthUrl      = "http://localhost:5107",
   [string]$OrdersCli    = "",
-  [string]$Filter       = ""
+  [string]$Filter       = "",
+  [switch]$Smoke
 )
 
 # ---------- locate repo/tests ----------
@@ -67,91 +68,75 @@ Write-Host ("PRODUCTS_URL:               " + ($env:PRODUCTS_URL))
 Write-Host ("AUTH_URL:                   " + ($env:AUTH_URL))
 if ($Filter) { Write-Host ("dotnet test filter:         " + $Filter) }
 
+# ---------- optional Smoke ping (quick health) ----------
+function Invoke-Ping {
+  param([string]$Method,[string]$Url,[int[]]$Expect)
+  try {
+    $r = Invoke-WebRequest -Method $Method -Uri $Url -UseBasicParsing -TimeoutSec 10 -ErrorAction Stop
+    if ($Expect -notcontains [int]$r.StatusCode) {
+      Write-Warning ("SMOKE: {0} {1} -> {2} (expected: {3})" -f $Method,$Url,[int]$r.StatusCode,($Expect -join ","))
+      return $false
+    }
+    Write-Host ("SMOKE: {0} {1} -> {2}" -f $Method,$Url,[int]$r.StatusCode)
+    return $true
+  }
+  catch {
+    Write-Warning ("SMOKE: {0} {1} FAILED: {2}" -f $Method,$Url,$_.Exception.Message)
+    return $false
+  }
+}
+
+if ($Smoke) {
+  Write-Host "`n== Smoke check ==" -ForegroundColor Yellow
+  $ok = $true
+  $ok = (Invoke-Ping GET    ($CatalogUrl.TrimEnd('/') + "/")                                    @(200)) -and $ok
+  # auth endpoints should require JWT (401 is OK)
+  $ok = (Invoke-Ping GET    ($AuthUrl.TrimEnd('/')    + "/auth/users")                          @(401)) -and $ok
+  $ok = (Invoke-Ping GET    ($AuthUrl.TrimEnd('/')    + "/auth/roles")                          @(401)) -and $ok
+  # simple 404 probe on a known not found id
+  $ok = (Invoke-Ping GET    ($ProductsUrl.TrimEnd('/') + "/products/999999")                    @(404)) -and $ok
+  $ok = (Invoke-Ping GET    ($CatalogUrl.TrimEnd('/')  + "/warehouses/999999")                  @(404)) -and $ok
+  $ok = (Invoke-Ping GET    ($OrdersUrl.TrimEnd('/')   + "/orders/999999")                      @(404)) -and $ok
+  if (-not $ok) { Write-Error "Smoke failed."; exit 2 }
+}
+
 # ---------- run tests ----------
 dotnet restore $proj.FullName | Tee-Object -FilePath $consoleLog -Append | Out-Null
 
 $argList = @("test", $proj.FullName, "--results-directory", $runDir, "--logger", ("trx;LogFileName=" + $trxName))
 if ($Filter) { $argList += @("--filter", $Filter) }
 
-$testOutput = & dotnet @argList 2>&1
+$testOutput = & dotnet @$argList 2>&1
 $testExit   = $LASTEXITCODE
 $testOutput | Tee-Object -FilePath $consoleLog -Append | Out-Null
 
-# find TRX
-$trx = $null
-if (Test-Path $trxPath) {
-  $trx = Get-Item $trxPath
-} else {
-  $trx = Get-ChildItem -Path $runDir -Filter *.trx | Sort-Object LastWriteTime -Desc | Select-Object -First 1
-}
-
-# ---------- helpers for markdown ----------
+# ---------- report builder (unchanged structure) ----------
 $lines = New-Object System.Collections.Generic.List[string]
 function Add-Line([string]$s) { [void]$lines.Add($s) }
 function Add-Empty { [void]$lines.Add("") }
-function Add-CodeBlock([string[]]$content) {
-  Add-Line('```')
-  foreach ($l in $content) { Add-Line($l) }
-  Add-Line('```')
-}
+function Add-CodeBlock([string[]]$content) { Add-Line('```'); foreach ($l in $content) { Add-Line($l) }; Add-Line('```') }
 
-# --- Extract expected/actual heuristics (from ErrorInfo.Message or StdOut) ---
 function Extract-ExpectedActual {
   param([string]$text)
   $result = @{ Expected = $null; Actual = $null }
-
   if ([string]::IsNullOrWhiteSpace($text)) { return $result }
-
-  # Pattern 1: xUnit style
-  #   Expected: foo
-  #   Actual:   bar
   $m = [regex]::Match($text, "(?im)^\s*Expected:\s*(.+)\r?\n\s*Actual:\s*(.+)$")
-  if ($m.Success) {
-    $result.Expected = $m.Groups[1].Value.Trim()
-    $result.Actual   = $m.Groups[2].Value.Trim()
-    return $result
-  }
-
-  # Pattern 2: FluentAssertions common phrasing:
-  #   ... to be <expected> but found <actual>.
+  if ($m.Success) { $result.Expected = $m.Groups[1].Value.Trim(); $result.Actual = $m.Groups[2].Value.Trim(); return $result }
   $m2 = [regex]::Match($text, "(?is)to be\s+(.+?)\s+but\s+found\s+(.+?)(?:[.\r\n]|$)")
-  if ($m2.Success) {
-    $result.Expected = $m2.Groups[1].Value.Trim()
-    $result.Actual   = $m2.Groups[2].Value.Trim()
-    return $result
-  }
-
-  # Pattern 3: Occasionally libraries write "Expected <e>, Actual <a>"
+  if ($m2.Success) { $result.Expected = $m2.Groups[1].Value.Trim(); $result.Actual = $m2.Groups[2].Value.Trim(); return $result }
   $m3 = [regex]::Match($text, "(?i)Expected\s*<(.+?)>\s*,?\s*Actual\s*<(.+?)>")
-  if ($m3.Success) {
-    $result.Expected = $m3.Groups[1].Value.Trim()
-    $result.Actual   = $m3.Groups[2].Value.Trim()
-    return $result
-  }
-
-  # Pattern 4: If tests print their own markers in StdOut:
-  #   EXPECT: ...
-  #   ACTUAL: ...
+  if ($m3.Success) { $result.Expected = $m3.Groups[1].Value.Trim(); $result.Actual = $m3.Groups[2].Value.Trim(); return $result }
   $m4 = [regex]::Match($text, "(?im)^\s*EXPECT:\s*(.+)\r?\n\s*ACTUAL:\s*(.+)$")
-  if ($m4.Success) {
-    $result.Expected = $m4.Groups[1].Value.Trim()
-    $result.Actual   = $m4.Groups[2].Value.Trim()
-    return $result
-  }
-
+  if ($m4.Success) { $result.Expected = $m4.Groups[1].Value.Trim(); $result.Actual = $m4.Groups[2].Value.Trim(); return $result }
   return $result
 }
 
-# Map UnitTest ID -> fully qualified name (if available)
-function Build-TestMap {
-  param([xml]$xml)
+function Build-TestMap { param([xml]$xml)
   $map = @{}
   if ($xml.TestRun -and $xml.TestRun.TestDefinitions -and $xml.TestRun.TestDefinitions.UnitTest) {
     $defs = @($xml.TestRun.TestDefinitions.UnitTest)
     foreach ($d in $defs) {
-      $id = "" + $d.id
-      $name = $d.Name
-      $class = $null
+      $id = "" + $d.id; $name = $d.Name; $class = $null
       if ($d.TestMethod -and $d.TestMethod.className) { $class = $d.TestMethod.className }
       if ($class) { $name = $class + "::" + $name }
       $map[$id] = $name
@@ -171,17 +156,23 @@ Add-Line("- **CATALOG_URL:** " + ($env:CATALOG_URL))
 Add-Line("- **INVENTORY_URL:** " + ($env:INVENTORY_URL))
 Add-Line("- **PRODUCTS_URL:** " + ($env:PRODUCTS_URL))
 Add-Line("- **AUTH_URL:** " + ($env:AUTH_URL))
-# backticks around connection string
 Add-Line("- **ConnectionStrings__Default:** " + '`' + $env:ConnectionStrings__Default + '`')
 Add-Empty
+
+# Find TRX
+$trx = $null
+if (Test-Path $trxPath) {
+  $trx = Get-Item $trxPath
+} else {
+  $trx = Get-ChildItem -Path $runDir -Filter *.trx | Sort-Object LastWriteTime -Desc | Select-Object -First 1
+}
 
 $failedCount = $null
 try {
   if ($trx) {
     [xml]$xml = Get-Content -LiteralPath $trx.FullName
     $c = $xml.TestRun.ResultSummary.Counters
-
-    $total   = 0; $passed = 0; $failed = 0; $skipped = 0
+    $total=0;$passed=0;$failed=0;$skipped=0
     if ($c) {
       if ($c.PSObject.Properties.Name -contains 'total')       { $total   = [int]$c.total }
       if ($c.PSObject.Properties.Name -contains 'passed')      { $passed  = [int]$c.passed }
@@ -196,19 +187,13 @@ try {
     Add-Line("| $total | $passed | $failed | $skipped |")
     Add-Empty
 
-    # Build test map
     $testMap = Build-TestMap -xml $xml
-
-    # Collect result nodes
     $allResults = @()
     if ($xml.TestRun.Results -and $xml.TestRun.Results.UnitTestResult) {
       $allResults = @($xml.TestRun.Results.UnitTestResult)
     }
 
-    $passedNodes = @()
-    $failedNodes = @()
-    $skippedNodes = @()
-
+    $passedNodes = @(); $failedNodes = @(); $skippedNodes = @()
     foreach ($r in $allResults) {
       switch ("" + $r.outcome) {
         "Passed"  { $passedNodes  += $r }
@@ -218,61 +203,39 @@ try {
       }
     }
 
-    # ----- Failed tests (with Expected/Actual parsing) -----
     if ($failedNodes.Count -gt 0) {
       Add-Line("## Failed tests"); Add-Empty
       foreach ($n in $failedNodes) {
         $name = $n.testName
         if ($n.testId -and $testMap.ContainsKey("" + $n.testId)) { $name = $testMap["" + $n.testId] }
         Add-Line("### " + $name)
-
         $msg = $null
         if ($n.Output -and $n.Output.ErrorInfo -and $n.Output.ErrorInfo.Message) {
           $msg = ($n.Output.ErrorInfo.Message -join "`n")
         }
-        if ($msg) {
-          Add-Empty; Add-Line("**Message:**"); Add-Empty
-          Add-CodeBlock(@($msg.Trim()))
-        }
-
-        # Try Expected/Actual from message first
+        if ($msg) { Add-Empty; Add-Line("**Message:**"); Add-Empty; Add-CodeBlock(@($msg.Trim())) }
         $ea = Extract-ExpectedActual -text $msg
-
-        # If not found, try StdOut
         if (-not $ea.Expected -and $n.Output -and $n.Output.StdOut) {
           $ea2 = Extract-ExpectedActual -text ($n.Output.StdOut -join "`n")
           if ($ea2.Expected) { $ea = $ea2 }
         }
-
         if ($ea.Expected -or $ea.Actual) {
-          Add-Empty
-          Add-Line("**Expected vs Actual (parsed):**"); Add-Empty
+          Add-Empty; Add-Line("**Expected vs Actual (parsed):**"); Add-Empty
           Add-Line("| Expected | Actual |")
           Add-Line("|----------|--------|")
           Add-Line("| " + ($ea.Expected -replace '\|','\|') + " | " + ($ea.Actual -replace '\|','\|') + " |")
           Add-Empty
         }
-
         $st = $null
         if ($n.Output -and $n.Output.ErrorInfo -and $n.Output.ErrorInfo.StackTrace) {
           $st = ($n.Output.ErrorInfo.StackTrace -join "`n")
         }
-        if ($st) {
-          Add-Line("**StackTrace:**"); Add-Empty
-          $stLines = [regex]::Split($st, "`r?`n") | Select-Object -First 80
-          Add-CodeBlock($stLines)
-        }
-
-        # Duration
-        if ($n.duration) {
-          Add-Line("**Duration:** " + $n.duration); Add-Empty
-        }
-
+        if ($st) { Add-Line("**StackTrace:**"); Add-Empty; $stLines = [regex]::Split($st, "`r?`n") | Select-Object -First 80; Add-CodeBlock($stLines) }
+        if ($n.duration) { Add-Line("**Duration:** " + $n.duration); Add-Empty }
         Add-Empty
       }
     }
 
-    # ----- Passed tests (with “what was expected / what came out”) -----
     if ($passedNodes.Count -gt 0) {
       Add-Line("## Passed tests"); Add-Empty
       Add-Line("| Test | Duration | Notes |")
@@ -280,28 +243,18 @@ try {
       foreach ($n in $passedNodes) {
         $name = $n.testName
         if ($n.testId -and $testMap.ContainsKey("" + $n.testId)) { $name = $testMap["" + $n.testId] }
-
-        $dur  = ""
-        if ($n.duration) { $dur = "" + $n.duration }
-
-        # Try to find Expected/Actual in StdOut (only if tests print them)
+        $dur  = ""; if ($n.duration) { $dur = "" + $n.duration }
         $notes = "Matched expected behaviour."
         if ($n.Output -and $n.Output.StdOut) {
           $ea = Extract-ExpectedActual -text ($n.Output.StdOut -join "`n")
-          if ($ea.Expected -and $ea.Actual) {
-            $notes = "Expected = " + $ea.Expected + "; Actual = " + $ea.Actual
-          }
+          if ($ea.Expected -and $ea.Actual) { $notes = "Expected = " + $ea.Expected + "; Actual = " + $ea.Actual }
         }
-
-        # Escape pipes in name/notes to not break table
-        $safeName  = ($name  -replace '\|','\|')
-        $safeNotes = ($notes -replace '\|','\|')
+        $safeName  = ($name  -replace '\|','\|'); $safeNotes = ($notes -replace '\|','\|')
         Add-Line("| $safeName | $dur | $safeNotes |")
       }
       Add-Empty
     }
 
-    # ----- Skipped tests -----
     if ($skippedNodes.Count -gt 0) {
       Add-Line("## Skipped tests"); Add-Empty
       foreach ($n in $skippedNodes) {
@@ -311,7 +264,6 @@ try {
       }
       Add-Empty
     }
-
   } else {
     Add-Line("No TRX file found in " + $runDir + "."); Add-Empty
   }
@@ -335,6 +287,7 @@ if ($trx) { Write-Host ("TRX: " + $trx.FullName) -ForegroundColor DarkGray }
 Write-Host ("Console log: " + $consoleLog) -ForegroundColor DarkGray
 
 # ---------- exit code ----------
+if ($Smoke -and $testExit -eq $null) { $testExit = 0 }
 if ($null -ne $failedCount) {
   if ($failedCount -gt 0) { exit 1 } else { exit 0 }
 } else {
