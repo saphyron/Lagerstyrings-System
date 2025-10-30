@@ -1,0 +1,201 @@
+{
+  "meta": {
+    "format": "httpie",
+    "version": "1.0.0",
+    "contentType": "collection",
+    "schema": "https://schema.httpie.io/1.0.0.json",
+    "docs": "https://httpie.io/r/help/export-from-httpie",
+    "source": "HTTPie Desktop 2025.2.0"
+  },
+  "entry": {
+    "name": "OrderEndpoints",
+    "icon": {
+      "name": "default",
+      "color": "gray"
+    },
+    "auth": {
+      "type": "bearer",
+      "credentials": {
+        "username": "",
+        "password": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOiJhZG1pbiIsImF1dGgiOiIxIiwid2giOiIiLCJuYmYiOjE3NjE1NzEzNzEsImV4cCI6MTc2MTYwMDE3MSwiaXNzIjoiTFNTIiwiYXVkIjoiTFNTIn0.QostemaMh_2KSjY_b0sgIRr_onujkiU9R3G_blj2PI8"
+      },
+      "target": "headers"
+    },
+    "requests": [
+      {
+        "name": "",
+        "url": "localhost:5107/orders",
+        "method": "POST",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "text",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "{\n  \"fromWarehouseId\": 3,\n  \"toWarehouseId\": null,\n  \"userId\": 5,\n  \"createdBy\": 1,\n  \"orderType\": \"Sales\",\n  \"status\": \"Draft\"\n}",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/orders/1",
+        "method": "GET",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "none",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/orders/by-user/5",
+        "method": "GET",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "none",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/orders/8",
+        "method": "PUT",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "text",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "{\n  \"fromWarehouseId\": 3,\n  \"toWarehouseId\": null,\n  \"userId\": 5,\n  \"createdBy\": 1,\n  \"orderType\": \"Sales\",\n  \"status\": \"Shipped\"\n}",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/orders/8/status",
+        "method": "PATCH",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "text",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "{\n  \"status\": \"Cancelled\"\n}",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/orders/8",
+        "method": "DELETE",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "none",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      }
+    ]
+  }
+}

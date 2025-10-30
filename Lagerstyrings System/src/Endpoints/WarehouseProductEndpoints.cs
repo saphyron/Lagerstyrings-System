@@ -1,8 +1,4 @@
-using System.Text;
-using Dapper;
-using LagerstyringsSystem.Database;
 using Microsoft.AspNetCore.Http.HttpResults;
-using LagerstyringsSystem.Orders;
 using Lagerstyrings_System;
 
 namespace LagerstyringsSystem.Endpoints
@@ -14,59 +10,53 @@ namespace LagerstyringsSystem.Endpoints
             var group = routes.MapGroup("/warehouseproducts").WithTags("WarehouseProducts");
 
             group.MapPost("/",
-            async (WarehouseProduct warehouseProduct, WarehouseProductRepository repository) =>
-            {
-                var warehouseProductId = await repository.CreateWarehouseProductAsync(warehouseProduct);
-                return Results.Created($"/warehouseproducts/{warehouseProductId}", warehouseProductId);
-            });
+                async (WarehouseProduct warehouseProduct, WarehouseProductRepository repository) =>
+                {
+                    var id = await repository.CreateWarehouseProductAsync(warehouseProduct);
+                    return Results.Created($"/warehouseproducts/{id}", id);
+                });
 
-            group.MapGet("/{warehouseProductId}",
-            async Task<Results<Ok<WarehouseProduct>, NotFound>> (int warehouseProductId, WarehouseProductRepository repository) =>
-            {
-                var warehouseProduct = await repository.GetWarehouseProductByIdAsync(warehouseProductId);
-                return warehouseProduct is null ? TypedResults.NotFound() : TypedResults.Ok(warehouseProduct);
-            });
+            group.MapGet("/{warehouseProductId:int}",
+                async Task<Results<Ok<WarehouseProduct>, NotFound>> (int warehouseProductId, WarehouseProductRepository repository) =>
+                {
+                    var wp = await repository.GetWarehouseProductByIdAsync(warehouseProductId);
+                    return wp is null ? TypedResults.NotFound() : TypedResults.Ok(wp);
+                });
 
             group.MapGet("/",
-            async (WarehouseProductRepository repository) =>
-            {
-                var warehouseProducts = await repository.GetAllWarehouseProductsAsync();
-                return warehouseProducts;
-            });
-
-            group.MapGet("/{warehouseId}/warehouseproducts",
-            async (int warehouseId, WarehouseProductRepository repository) =>
-            {
-                var warehouseProducts = await repository.GetWarehouseProductsByWarehouseIdAsync(warehouseId);
-                return warehouseProducts;
-            });
-
-            group.MapPut("/{warehouseProductId}",
-            async (int warehouseProductId, WarehouseProduct updatedWarehouseProduct, WarehouseProductRepository repository) =>
-            {
-                var existingWarehouseProduct = await repository.GetWarehouseProductByIdAsync(warehouseProductId);
-                if (existingWarehouseProduct is null)
+                async (WarehouseProductRepository repository) =>
                 {
-                    return Results.NotFound();
-                }
+                    var items = await repository.GetAllWarehouseProductsAsync();
+                    return Results.Ok(items);
+                });
 
-                updatedWarehouseProduct.Id = warehouseProductId;
-                var success = await repository.UpdateWarehouseProductAsync(updatedWarehouseProduct);
-                return success ? Results.NoContent() : Results.StatusCode(500);
-            });
-
-            group.MapDelete("/{warehouseProductId}",
-            async (int warehouseProductId, WarehouseProductRepository repository) =>
-            {
-                var existingWarehouseProduct = await repository.GetWarehouseProductByIdAsync(warehouseProductId);
-                if (existingWarehouseProduct is null)
+            group.MapGet("/by-warehouse/{warehouseId:int}",
+                async (int warehouseId, WarehouseProductRepository repository) =>
                 {
-                    return Results.NotFound();
-                }
+                    var items = await repository.GetWarehouseProductsByWarehouseIdAsync(warehouseId);
+                    return Results.Ok(items);
+                });
 
-                var success = await repository.DeleteWarehouseProductAsync(warehouseProductId);
-                return success ? Results.NoContent() : Results.StatusCode(500);
-            });
+            group.MapPut("/{warehouseProductId:int}",
+                async (int warehouseProductId, WarehouseProduct updated, WarehouseProductRepository repository) =>
+                {
+                    var existing = await repository.GetWarehouseProductByIdAsync(warehouseProductId);
+                    if (existing is null) return Results.NotFound();
+
+                    updated.Id = warehouseProductId;
+                    var ok = await repository.UpdateWarehouseProductAsync(updated);
+                    return ok ? Results.NoContent() : Results.StatusCode(500);
+                });
+
+            group.MapDelete("/{warehouseProductId:int}",
+                async (int warehouseProductId, WarehouseProductRepository repository) =>
+                {
+                    var existing = await repository.GetWarehouseProductByIdAsync(warehouseProductId);
+                    if (existing is null) return Results.NotFound();
+
+                    var ok = await repository.DeleteWarehouseProductAsync(warehouseProductId);
+                    return ok ? Results.NoContent() : Results.StatusCode(500);
+                });
 
             return group;
         }

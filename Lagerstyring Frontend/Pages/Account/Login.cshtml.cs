@@ -24,6 +24,7 @@ public class LoginModel : PageModel
 
         var resp = await client.PostAsJsonAsync("/auth/users/login", new { username = Username, password = Password });
 
+
         if (resp is null)
         {
             Error = "error: <null response>";
@@ -32,7 +33,6 @@ public class LoginModel : PageModel
 
         if (!resp.IsSuccessStatusCode)
         {
-            // Evt. læs body for bedre fejlbesked
             var body = await resp.Content.ReadAsStringAsync();
             Error = $"error: {(int)resp.StatusCode} {resp.ReasonPhrase} - {body}";
             return Page();
@@ -51,7 +51,7 @@ public class LoginModel : PageModel
                     Response.Cookies.Append("AuthToken", token!, new CookieOptions
                     {
                         HttpOnly = true,
-                        Secure = true,
+                        Secure = secure,
                         SameSite = SameSiteMode.Strict,
                         Path = "/"
                     });

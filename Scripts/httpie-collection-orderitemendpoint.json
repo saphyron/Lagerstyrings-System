@@ -1,0 +1,167 @@
+{
+  "meta": {
+    "format": "httpie",
+    "version": "1.0.0",
+    "contentType": "collection",
+    "schema": "https://schema.httpie.io/1.0.0.json",
+    "docs": "https://httpie.io/r/help/export-from-httpie",
+    "source": "HTTPie Desktop 2025.2.0"
+  },
+  "entry": {
+    "name": "OrderItemEndpoint",
+    "icon": {
+      "name": "default",
+      "color": "gray"
+    },
+    "auth": {
+      "type": "none"
+    },
+    "requests": [
+      {
+        "name": "",
+        "url": "localhost:5107/orderitems/by-order/1",
+        "method": "GET",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "none",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/orderitems/by-order/1/product/1/count",
+        "method": "GET",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "none",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/orderitems",
+        "method": "POST",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "text",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "  {\n    \"orderId\": 1,\n    \"productId\": 3,\n    \"itemCount\": 3\n  }",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/orderitems",
+        "method": "PUT",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "text",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "  {\n    \"orderId\": 1,\n    \"productId\": 3,\n    \"itemCount\": 7\n  }",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/orderitems/11",
+        "method": "DELETE",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "none",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      }
+    ]
+  }
+}

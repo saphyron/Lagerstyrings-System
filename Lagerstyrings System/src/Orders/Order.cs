@@ -1,6 +1,5 @@
 using LagerstyringsSystem.Database;
 using Dapper;
-using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
 using Lagerstyrings_System;
 
 namespace LagerstyringsSystem.Orders
@@ -12,29 +11,36 @@ namespace LagerstyringsSystem.Orders
         public OrderRepository(ISqlConnectionFactory factory)
         => _factory = factory;
 
-        public async Task<int> CreateOrderAsync(Order order)
+        public async Task<long> CreateOrderAsync(Order order)
         {
             var sql = @"
-                INSERT INTO dbo.Orders (FromWarehouseId, ToWarehouseId, UserId, OrderType, CreatedAt)
-                VALUES (@FromWarehouseId, @ToWarehouseId, @UserId, @OrderType, @CreatedAt);
-                SELECT CAST(SCOPE_IDENTITY() as int);";
+                INSERT INTO dbo.Orders (FromWarehouseId, ToWarehouseId, UserId, CreatedBy, OrderType, Status)
+                VALUES (@FromWarehouseId, @ToWarehouseId, @UserId, @CreatedBy, @OrderType, @Status);
+                SELECT CAST(SCOPE_IDENTITY() as bigint);";
 
             using var conn = _factory.Create();
             conn.Open();
 
-            var orderId = await conn.ExecuteScalarAsync<int>(sql, order);
-            return orderId;
+            var newId = await conn.ExecuteScalarAsync<long>(sql, new
+            {
+                order.FromWarehouseId,
+                order.ToWarehouseId,
+                order.UserId,
+                order.CreatedBy,
+                order.OrderType,
+                Status = string.IsNullOrWhiteSpace(order.Status) ? "Draft" : order.Status
+            });
+            return newId;
         }
 
-        public async Task<Order?> GetOrderByIdAsync(int orderId)
+        public async Task<Order?> GetOrderByIdAsync(long orderId)
         {
             var sql = "SELECT * FROM dbo.Orders WHERE Id = @orderId;";
 
             using var conn = _factory.Create();
             conn.Open();
 
-            var order = await conn.QuerySingleOrDefaultAsync<Order>(sql, new { orderId });
-            return order;
+            return await conn.QuerySingleOrDefaultAsync<Order>(sql, new { orderId });
         }
 
         public async Task<IEnumerable<Order>> GetAllOrdersByUserAsync(int userId)
@@ -44,8 +50,7 @@ namespace LagerstyringsSystem.Orders
             using var conn = _factory.Create();
             conn.Open();
 
-            var orders = await conn.QueryAsync<Order>(sql, new { userId });
-            return orders;
+            return await conn.QueryAsync<Order>(sql, new { userId });
         }
 
         public async Task<bool> UpdateOrderAsync(Order order)
@@ -53,115 +58,84 @@ namespace LagerstyringsSystem.Orders
             var sql = @"
                 UPDATE dbo.Orders
                 SET FromWarehouseId = @FromWarehouseId,
-                    ToWarehouseId = @ToWarehouseId,
-                    UserId = @UserId,
-                    OrderType = @OrderType,
-                    CreatedAt = @CreatedAt
+                    ToWarehouseId   = @ToWarehouseId,
+                    UserId          = @UserId,
+                    CreatedBy       = @CreatedBy,
+                    OrderType       = @OrderType,
+                    Status          = @Status
                 WHERE Id = @Id;";
 
             using var conn = _factory.Create();
             conn.Open();
 
-            var affectedRows = await conn.ExecuteAsync(sql, order);
-            return affectedRows > 0;
+            var affected = await conn.ExecuteAsync(sql, order);
+            return affected > 0;
+        }
+
+        public async Task<bool> UpdateOrderStatusAsync(long orderId, string status)
+        {
+            var sql = "UPDATE dbo.Orders SET Status = @status WHERE Id = @orderId;";
+
+            using var conn = _factory.Create();
+            conn.Open();
+
+            var affected = await conn.ExecuteAsync(sql, new { orderId, status });
+            return affected > 0;
         }
         
-        public async Task<bool> DeleteOrderAsync(int orderId)
+        public async Task<bool> DeleteOrderAsync(long orderId)
         {
             var sql = "DELETE FROM dbo.Orders WHERE Id = @orderId;";
 
             using var conn = _factory.Create();
             conn.Open();
 
-            var affectedRows = await conn.ExecuteAsync(sql, new { orderId });
-            return affectedRows > 0;
+            var affected = await conn.ExecuteAsync(sql, new { orderId });
+            return affected > 0;
         }
     }
     public class Order : IOrder
     {
-        //private readonly OrderRepository _orderRepository;
-
-        public int Id { get; set; }
-        //public int FromWarehouseId { get; set; }
+        public long Id { get; set; }
         public int? FromWarehouseId { get; set; }
-        //public int ToWarehouseId { get; set; }
         public int? ToWarehouseId { get; set; }
         public int UserId { get; set; }
-        //public string OrderType { get; set; }
-        public string OrderType { get; set; } = string.Empty;
+        public int CreatedBy { get; set; }
+        public string OrderType { get; set; } = "";
+        public string Status { get; set; } = "Draft";
         public DateTime CreatedAt { get; set; }
-        
+
         public Warehouse? FromWarehouse { get; set; }
         public Warehouse? ToWarehouse { get; set; }
-        //public List<OrderItem> Items { get; set; }
-        public List<OrderItem> Items { get; set; } = new List<OrderItem>();
+        public List<OrderItem> Items { get; set; } = new();
         public Order() {}
 
-        public Order(int fromWarehouseId, int toWarehouseId, int userId, string orderType, DateTime createdAt)
+        public Order(int? fromWarehouseId, int? toWarehouseId, int userId, int createdBy, string orderType, string status = "Draft")
         {
             FromWarehouseId = fromWarehouseId;
             ToWarehouseId = toWarehouseId;
             UserId = userId;
+            CreatedBy = createdBy;
             OrderType = orderType;
-            CreatedAt = createdAt;
-            Items = new List<OrderItem>();
-            FromWarehouse = null;
-            ToWarehouse = null;
+            Status = status;
         }
 
-        public void AddItem(OrderItem item)
-        {
-            Items.Add(item);
-        }
+        public void AddItem(OrderItem item) => Items.Add(item);
+        public void ExecuteOrder() => throw new NotImplementedException();
+        public void CancelOrder() => throw new NotImplementedException();
 
-        public void ExecuteOrder()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SaleOrder()
-        {
-            throw new NotImplementedException();
-        }
-
-        public void TransferOrder()
-        {
-
-        }
-
-        public void PurchaseOrder()
-        {
-
-        }
-
-        public void ReturnOrder()
-        {
-
-        }
-
-        public void CancelOrder()
-        {
-            throw new NotImplementedException();
-        }
-
-        public decimal GetOrderTotal()  
+        public decimal GetOrderTotal()
         {
             decimal total = 0;
-            foreach (var item in Items)
-            {
-                total += item.ReturnTotalPrice();
-            }
-
+            foreach (var item in Items) total += item.ReturnTotalPrice();
             return total;
         }
-        
+
         public string GetOrderDetails()
         {
-            string details = $"User ID: {UserId}, Order Date: {CreatedAt}, order Type: {OrderType} \nItems:\n";
-            foreach (var item in Items) {
+            var details = $"User ID: {UserId}, CreatedBy: {CreatedBy}, CreatedAt: {CreatedAt:u}, Type: {OrderType}, Status: {Status}\nItems:\n";
+            foreach (var item in Items)
                 details += $"- Product ID: {item.ProductId}, Quantity: {item.ItemCount}\n";
-            }
-            
             return details;
         }
     }

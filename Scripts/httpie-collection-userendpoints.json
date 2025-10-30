@@ -1,0 +1,201 @@
+{
+  "meta": {
+    "format": "httpie",
+    "version": "1.0.0",
+    "contentType": "collection",
+    "schema": "https://schema.httpie.io/1.0.0.json",
+    "docs": "https://httpie.io/r/help/export-from-httpie",
+    "source": "HTTPie Desktop 2025.2.0"
+  },
+  "entry": {
+    "name": "UserEndpoints",
+    "icon": {
+      "name": "default",
+      "color": "gray"
+    },
+    "auth": {
+      "type": "bearer",
+      "credentials": {
+        "username": "",
+        "password": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxIiwidW5pcXVlX25hbWUiOiJhZG1pbiIsImF1dGgiOiIxIiwid2giOiIiLCJuYmYiOjE3NjE1NjY0MDYsImV4cCI6MTc2MTU5NTIwNiwiaXNzIjoiTFNTIiwiYXVkIjoiTFNTIn0.XBWK8kPFoB1uuBO_zH1gMJIC4tQTWEkE8ZT9tOqA70M"
+      },
+      "target": "headers"
+    },
+    "requests": [
+      {
+        "name": "",
+        "url": "localhost:5107/auth/users/login",
+        "method": "POST",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "none"
+        },
+        "body": {
+          "type": "text",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "{\n  \"username\": \"admin\",\n  \"password\": \"admin\"\n}",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/auth/users",
+        "method": "GET",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "none",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/auth/users/1",
+        "method": "GET",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "none",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/auth/users",
+        "method": "POST",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "text",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "{\n  \"username\": \"admin2\",\n  \"PasswordClear\": \"admin2\",\n  \"authEnum\": 1,\n  \"warehouseId\": null\n}",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/auth/users/6",
+        "method": "PUT",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "text",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "{\n  \"username\": \"admin2\",\n  \"PasswordClear\": \"admin2\",\n  \"authEnum\": 1,\n  \"warehouseId\": 1\n}",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      },
+      {
+        "name": "",
+        "url": "localhost:5107/auth/users/6",
+        "method": "DELETE",
+        "headers": [],
+        "queryParams": [],
+        "pathParams": [],
+        "auth": {
+          "type": "inherited"
+        },
+        "body": {
+          "type": "none",
+          "file": {
+            "name": ""
+          },
+          "text": {
+            "value": "",
+            "format": "application/json"
+          },
+          "form": {
+            "isMultipart": false,
+            "fields": []
+          },
+          "graphql": {
+            "query": "",
+            "variables": ""
+          }
+        }
+      }
+    ]
+  }
+}
