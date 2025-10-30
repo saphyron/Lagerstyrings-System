@@ -7,7 +7,6 @@ namespace LagerstyringsSystem.Orders {
         public static readonly OrderTypeEnum Purchase = new OrderTypeEnum("Purchase");
         
         public string OrderType { get; }
-        public OrderTypeEnum() {}
 
         private OrderTypeEnum(string orderType)
         {

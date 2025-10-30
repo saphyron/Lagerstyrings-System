@@ -1,0 +1,38 @@
+@page
+@model LagerstyringFrontend.Pages.Warehouse.WarehouseViewModel
+@{
+    ViewData["Title"] = "Lager";
+}
+
+<html>
+<head>
+<h1 style="text-align: center">Lager: @Model.Id</h1>
+<p></p>
+<h3 style="text-align: center">@Model.Name</h3>
+</head>
+<body>
+<table class="table">
+<thead>
+<tr>
+  <th>Produkt ID</th>
+  <th>Produkt Navn</th>
+  <th>Produkt Type</th>
+  <th>Antal</th>
+</tr>
+</thead>
+<tbody>
+@foreach(var item in Model.ListItems){
+    <tr>
+      <td>@item.Id</td>
+      <td>@item.Name</td>
+      <td>@item.Type</td>
+      <td>@item.Quantity</td>
+    </tr>
+}
+</tbody>
+</table>
+<form method="get" asp-page="/Order/CreateOrder" asp-route-id="@Model.Id" class="mt-3">
+  <button class="btn btn-default" style="btn-align: center;">Opret order</button>
+</form>
+</body>
+</html>
