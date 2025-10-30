@@ -3,8 +3,19 @@ using Lagerstyrings_System;
 
 namespace LagerstyringsSystem.Endpoints
 {
+    /// <summary>
+    /// Registers HTTP endpoints for product operations on the /products route group.
+    /// </summary>
+    /// <remarks>
+    /// Exposes create, read single, read all, update, and delete operations for products.
+    /// </remarks>
     public static class ProductEndpoints
     {
+        /// <summary>
+        /// Adds the Products route group and handlers.
+        /// </summary>
+        /// <param name="routes">The endpoint route builder.</param>
+        /// <returns>The configured route group builder for /products.</returns>
         public static RouteGroupBuilder MapProductEndpoints(this IEndpointRouteBuilder routes)
         {
             var group = routes.MapGroup("/products").WithTags("Products");

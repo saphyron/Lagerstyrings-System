@@ -8,11 +8,22 @@ using Microsoft.Data.SqlClient;
 using Xunit;
 
 namespace Tests.Spectests;
-
+/// <summary>
+/// Contract tests for /auth/users endpoints requiring JWT.
+/// </summary>
+/// <remarks>
+/// Covers login token retrieval, user listing, get by id, create, update, and delete flows.
+/// </remarks>
 public sealed class UsersContractTests
 {
+    /// <summary>
+    /// Computes the base URL for user endpoints.
+    /// </summary>
+    /// <returns>Base URL string.</returns>
     static string BaseUrl() => (Environment.GetEnvironmentVariable("AUTH_URL") ?? "http://localhost:5107").TrimEnd('/');
-
+    /// <summary>
+    /// Ensures required seed data exists for login and role checks.
+    /// </summary>
     static async Task SeedAsync()
     {
         await using var c = new SqlConnection(Environment.GetEnvironmentVariable("ConnectionStrings__Default"));
@@ -22,7 +33,10 @@ public sealed class UsersContractTests
         await c.ExecuteAsync(@"IF NOT EXISTS(SELECT 1 FROM dbo.Users WHERE Username=N'apitest')
                                INSERT dbo.Users(Username,PasswordClear,AuthEnum) VALUES(N'apitest',N'testpass',1);");
     }
-
+    /// <summary>
+    /// Logs in and returns a JWT token.
+    /// </summary>
+    /// <returns>Bearer token string.</returns>
     static async Task<string> LoginAsync()
     {
         await SeedAsync();
@@ -33,21 +47,29 @@ public sealed class UsersContractTests
         payload!.Token.Should().NotBeNullOrWhiteSpace();
         return payload!.Token!;
     }
-
+    /// <summary>
+    /// Builds an HttpClient authorized with the specified token.
+    /// </summary>
+    /// <param name="token">JWT token.</param>
+    /// <returns>Configured HttpClient.</returns>
     static HttpClient Authed(string token)
     {
         var h = new HttpClient { BaseAddress = new Uri(BaseUrl()) };
         h.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return h;
     }
-
+    /// <summary>
+    /// Verifies that login returns a non-empty token.
+    /// </summary>
     [Fact(DisplayName = "POST /auth/users/login → 200 + token")]
     public async Task Login_Returns_Token()
     {
         var token = await LoginAsync();
         token.Should().NotBeNullOrWhiteSpace();
     }
-
+    /// <summary>
+    /// Verifies that listing users requires and accepts JWT.
+    /// </summary>
     [Fact(DisplayName = "GET /auth/users → 200 (with JWT)")]
     public async Task Users_List()
     {
@@ -58,7 +80,9 @@ public sealed class UsersContractTests
         var users = await res.Content.ReadFromJsonAsync<List<PublicUser>>();
         users!.Any(u => u.Username == "apitest").Should().BeTrue();
     }
-
+    /// <summary>
+    /// Verifies that fetching a user by id returns HTTP 200 for an existing user.
+    /// </summary>
     [Fact(DisplayName = "GET /auth/users/{id} → 200/404 (with JWT)")]
     public async Task Users_Get_By_Id()
     {
@@ -70,7 +94,9 @@ public sealed class UsersContractTests
         var res = await http.GetAsync($"/auth/users/{id}");
         res.StatusCode.Should().Be(HttpStatusCode.OK);
     }
-
+    /// <summary>
+    /// Verifies that creating a user returns HTTP 201.
+    /// </summary>
     [Fact(DisplayName = "POST /auth/users → 201 Created")]
     public async Task Users_Create()
     {
@@ -86,7 +112,9 @@ public sealed class UsersContractTests
         await c.OpenAsync();
         await c.ExecuteAsync("DELETE FROM dbo.Users WHERE Username=@u", new { u = uname });
     }
-
+    /// <summary>
+    /// Verifies that updating a user returns HTTP 204.
+    /// </summary>
     [Fact(DisplayName = "PUT /auth/users/{id} → 204 NoContent")]
     public async Task Users_Update()
     {
@@ -101,7 +129,9 @@ public sealed class UsersContractTests
         res.StatusCode.Should().Be(HttpStatusCode.NoContent);
         await c.ExecuteAsync("DELETE FROM dbo.Users WHERE Id=@id", new { id });
     }
-
+    /// <summary>
+    /// Verifies that deleting a user returns HTTP 204.
+    /// </summary>
     [Fact(DisplayName = "DELETE /auth/users/{id} → 204/404")]
     public async Task Users_Delete()
     {

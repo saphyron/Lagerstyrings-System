@@ -7,11 +7,23 @@ using Microsoft.Data.SqlClient;
 using Xunit;
 
 namespace Tests.Spectests;
-
+/// <summary>
+/// Contract tests for /orderitems endpoints.
+/// </summary>
+/// <remarks>
+/// Seeds independent orders and products, exercises create, list, count, update, and delete flows.
+/// </remarks>
 public sealed class OrderItemsContractTests
 {
+    /// <summary>
+    /// Computes the base URL for order item endpoints.
+    /// </summary>
+    /// <returns>Base URL string.</returns>
     static string BaseUrl() => (Environment.GetEnvironmentVariable("ORDERS_URL") ?? "http://localhost:5107").TrimEnd('/');
-
+    /// <summary>
+    /// Inserts a test user, product, and order to establish foreign keys.
+    /// </summary>
+    /// <returns>Tuple of order id and product id.</returns>
     static async Task<(long oid,int pid)> SeedOrderAndProductAsync()
     {
         await using var c = new SqlConnection(Environment.GetEnvironmentVariable("ConnectionStrings__Default"));
@@ -22,7 +34,11 @@ public sealed class OrderItemsContractTests
                                                     VALUES(NULL,NULL,@u,@u,N'S',N'Draft'); SELECT CAST(SCOPE_IDENTITY() AS bigint);", new { u = uid });
         return (oid,pid);
     }
-
+    /// <summary>
+    /// Deletes test data created by seeding helpers.
+    /// </summary>
+    /// <param name="oid">Order identifier.</param>
+    /// <param name="pid">Product identifier.</param>
     static async Task CleanupAsync(long oid, int pid)
     {
         await using var c = new SqlConnection(Environment.GetEnvironmentVariable("ConnectionStrings__Default"));
@@ -32,7 +48,9 @@ public sealed class OrderItemsContractTests
         await c.ExecuteAsync("DELETE FROM dbo.Products WHERE Id=@p", new { p = pid });
         await c.ExecuteAsync("DELETE FROM dbo.Users WHERE Username=N'__oiu__'");
     }
-
+    /// <summary>
+    /// Verifies that creating an order item returns HTTP 201.
+    /// </summary>
     [Fact(DisplayName = "POST /orderitems → 201")]
     public async Task Create()
     {
@@ -41,7 +59,9 @@ public sealed class OrderItemsContractTests
         r.StatusCode.Should().Be(HttpStatusCode.Created);
         await CleanupAsync(oid,pid);
     }
-
+    /// <summary>
+    /// Verifies that listing items by order returns HTTP 200.
+    /// </summary>
     [Fact(DisplayName = "GET /orderitems/by-order/{orderId} → 200")]
     public async Task ListByOrder()
     {
@@ -52,7 +72,9 @@ public sealed class OrderItemsContractTests
         r.StatusCode.Should().Be(HttpStatusCode.OK);
         await CleanupAsync(oid,pid);
     }
-
+    /// <summary>
+    /// Verifies that item count by order and product returns HTTP 200.
+    /// </summary>
     [Fact(DisplayName = "GET /orderitems/by-order/{orderId}/product/{productId}/count → 200")]
     public async Task CountByOrderProduct()
     {
@@ -63,7 +85,9 @@ public sealed class OrderItemsContractTests
         r.StatusCode.Should().Be(HttpStatusCode.OK);
         await CleanupAsync(oid,pid);
     }
-
+    /// <summary>
+    /// Verifies that updating an order item returns HTTP 204.
+    /// </summary>
     [Fact(DisplayName = "PUT /orderitems → 204")]
     public async Task Update()
     {
@@ -74,7 +98,9 @@ public sealed class OrderItemsContractTests
         r.StatusCode.Should().Be(HttpStatusCode.NoContent);
         await CleanupAsync(oid,pid);
     }
-
+    /// <summary>
+    /// Verifies that deleting an order item returns HTTP 204.
+    /// </summary>
     [Fact(DisplayName = "DELETE /orderitems/{orderItemId} → 204")]
     public async Task Delete()
     {

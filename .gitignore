@@ -11,6 +11,8 @@ Lagerstyrings System/bin/
 Lagerstyring Frontend/obj/
 Lagerstyring Frontend/bin/
 Lagerstyring Frontend/wwwroot/
+tests/bin/
+tests/obj/
 
 # Precompiled Headers
 *.gch

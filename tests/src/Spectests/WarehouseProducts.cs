@@ -7,11 +7,23 @@ using Microsoft.Data.SqlClient;
 using Xunit;
 
 namespace Tests.Spectests;
-
+/// <summary>
+/// Contract tests for /warehouseproducts endpoints.
+/// </summary>
+/// <remarks>
+/// Verifies CRUD and listing, including by-warehouse queries.
+/// </remarks>
 public sealed class WarehouseProductsContractTests
 {
+    /// <summary>
+    /// Computes the base URL for catalog endpoints.
+    /// </summary>
+    /// <returns>Base URL string.</returns>
     static string BaseUrl() => (Environment.GetEnvironmentVariable("CATALOG_URL") ?? "http://localhost:5107").TrimEnd('/');
-
+    /// <summary>
+    /// Creates a warehouse and product and one SKU row for testing.
+    /// </summary>
+    /// <returns>Identifiers for warehouse, product, and sku.</returns>
     static async Task<(int wid,int pid,int id)> SeedOneAsync()
     {
         await using var c = new SqlConnection(Environment.GetEnvironmentVariable("ConnectionStrings__Default"));
@@ -21,7 +33,11 @@ public sealed class WarehouseProductsContractTests
         var id  = await c.ExecuteScalarAsync<int>("INSERT dbo.WarehouseProducts(WarehouseId,ProductId,Quantity) VALUES(@w,@p,5); SELECT CAST(SCOPE_IDENTITY() AS int);", new { w = wid, p = pid });
         return (wid,pid,id);
     }
-
+    /// <summary>
+    /// Removes seeded warehouse, product, and related sku rows.
+    /// </summary>
+    /// <param name="wid">Warehouse identifier.</param>
+    /// <param name="pid">Product identifier.</param>
     static async Task CleanupAsync(int wid,int pid)
     {
         await using var c = new SqlConnection(Environment.GetEnvironmentVariable("ConnectionStrings__Default"));
@@ -30,7 +46,9 @@ public sealed class WarehouseProductsContractTests
         await c.ExecuteAsync("DELETE FROM dbo.Warehouses WHERE Id=@w", new { w = wid });
         await c.ExecuteAsync("DELETE FROM dbo.Products WHERE Id=@p", new { p = pid });
     }
-
+    /// <summary>
+    /// Verifies that creating a SKU returns HTTP 201.
+    /// </summary>
     [Fact(DisplayName = "POST /warehouseproducts → 201")]
     public async Task Create()
     {
@@ -45,7 +63,9 @@ public sealed class WarehouseProductsContractTests
 
         await CleanupAsync(wid,pid);
     }
-
+    /// <summary>
+    /// Verifies that getting a SKU by id returns HTTP 200 for an existing record.
+    /// </summary>
     [Fact(DisplayName = "GET /warehouseproducts/{id} → 200/404")]
     public async Task GetOne()
     {
@@ -54,14 +74,18 @@ public sealed class WarehouseProductsContractTests
         r.StatusCode.Should().Be(HttpStatusCode.OK);
         await CleanupAsync(wid,pid);
     }
-
+    /// <summary>
+    /// Verifies that listing SKUs returns HTTP 200.
+    /// </summary>
     [Fact(DisplayName = "GET /warehouseproducts → 200 list")]
     public async Task List()
     {
         var r = await new HttpClient().GetAsync($"{BaseUrl()}/warehouseproducts");
         r.StatusCode.Should().Be(HttpStatusCode.OK);
     }
-
+    /// <summary>
+    /// Verifies that listing SKUs by warehouse returns HTTP 200.
+    /// </summary>
     [Fact(DisplayName = "GET /warehouseproducts/by-warehouse/{warehouseId} → 200")]
     public async Task ListByWarehouse()
     {
@@ -70,7 +94,9 @@ public sealed class WarehouseProductsContractTests
         r.StatusCode.Should().Be(HttpStatusCode.OK);
         await CleanupAsync(wid,pid);
     }
-
+    /// <summary>
+    /// Verifies that updating a SKU returns HTTP 204.
+    /// </summary>
     [Fact(DisplayName = "PUT /warehouseproducts/{id} → 204")]
     public async Task Update()
     {
@@ -79,7 +105,9 @@ public sealed class WarehouseProductsContractTests
         r.StatusCode.Should().Be(HttpStatusCode.NoContent);
         await CleanupAsync(wid,pid);
     }
-
+    /// <summary>
+    /// Verifies that deleting a SKU returns HTTP 204.
+    /// </summary>
     [Fact(DisplayName = "DELETE /warehouseproducts/{id} → 204")]
     public async Task Delete()
     {

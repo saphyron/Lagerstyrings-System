@@ -3,8 +3,19 @@ using Lagerstyrings_System;
 
 namespace LagerstyringsSystem.Endpoints
 {
+    /// <summary>
+    /// Registers HTTP endpoints for warehouse-product (SKU) operations on /warehouseproducts.
+    /// </summary>
+    /// <remarks>
+    /// Exposes CRUD and listing endpoints, including listing by warehouse.
+    /// </remarks>
     public static class WarehouseProductEndpoints
     {
+        /// <summary>
+        /// Adds the WarehouseProducts route group and handlers.
+        /// </summary>
+        /// <param name="routes">The endpoint route builder.</param>
+        /// <returns>The configured route group builder for /warehouseproducts.</returns>
         public static RouteGroupBuilder MapWarehouseProductEndpoints(this IEndpointRouteBuilder routes)
         {
             var group = routes.MapGroup("/warehouseproducts").WithTags("WarehouseProducts");

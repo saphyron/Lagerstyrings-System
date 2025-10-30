@@ -3,8 +3,28 @@ using LagerstyringsSystem.Orders;
 
 namespace LagerstyringsSystem.Endpoints
 {
+    /// <summary>
+    /// Registers HTTP endpoints for order operations on the /orders route group.
+    /// </summary>
+    /// <remarks>
+    /// Maps create, read, update, delete, and status patch endpoints.
+    /// Uses minimal APIs with dependency-injected repositories.
+    /// </remarks>
     public static class OrderEndpoints
     {
+        /// <summary>
+        /// Adds the Orders route group and its handlers to the endpoint route builder.
+        /// </summary>
+        /// <param name="routes">The application endpoint route builder.</param>
+        /// <returns>The configured route group builder for /orders.</returns>
+        /// <remarks>
+        /// POST /orders creates an order and returns 201 with the new identifier.
+        /// GET /orders/{orderId} returns 200 with the order or 404 if not found.
+        /// GET /orders/by-user/{userId} lists orders for a user.
+        /// PUT /orders/{orderId} updates a full order and returns 204 or 404.
+        /// PATCH /orders/{orderId}/status updates only the order status with validation.
+        /// DELETE /orders/{orderId} removes an order and returns 204 or 404.
+        /// </remarks>
         public static RouteGroupBuilder MapOrderEndpoints(this IEndpointRouteBuilder routes)
         {
             var group = routes.MapGroup("/orders").WithTags("Orders");
@@ -76,9 +96,18 @@ namespace LagerstyringsSystem.Endpoints
 
             return group;
         }
-
+        /// <summary>
+        /// Payload for updating an order's status.
+        /// </summary>
+        /// <remarks>
+        /// Accepted values are validated by the endpoint before persistence.
+        /// </remarks>
         public sealed class StatusRequest
         {
+            /// <summary>
+            /// New status value for the order.
+            /// </summary>
+            /// <value>Allowed values: Draft, Shipped, Cancelled, OnHold.</value>
             public string Status { get; set; } = "";
         }
     }

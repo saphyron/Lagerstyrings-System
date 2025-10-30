@@ -3,8 +3,26 @@ using LagerstyringsSystem.Orders;
 
 namespace LagerstyringsSystem.Endpoints
 {
+    /// <summary>
+    /// Registers HTTP endpoints for order item operations on the /orderitems route group.
+    /// </summary>
+    /// <remarks>
+    /// Provides CRUD endpoints and simple aggregate read for item counts per product.
+    /// </remarks>
     public static class OrderItemEndpoints
     {
+        /// <summary>
+        /// Adds the OrderItems route group and handlers.
+        /// </summary>
+        /// <param name="routes">The application endpoint route builder.</param>
+        /// <returns>The configured route group builder for /orderitems.</returns>
+        /// <remarks>
+        /// POST creates an order item and returns its identifier.
+        /// GET by-order lists items for a specific order.
+        /// GET count returns the quantity for a specific product within an order or 0.
+        /// PUT updates item count.
+        /// DELETE removes an item by identifier.
+        /// </remarks>
         public static RouteGroupBuilder MapOrderItemEndpoints(this IEndpointRouteBuilder routes)
         {
             var group = routes.MapGroup("/orderitems")

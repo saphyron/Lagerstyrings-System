@@ -1,4 +1,10 @@
 ﻿namespace Lagerstyrings_System {
+    /// <summary>
+    /// Classifies products into broad categories.
+    /// </summary>
+    /// <remarks>
+    /// Used for policy and handling rules in other parts of the system.
+    /// </remarks>
     public enum ProductTypeEnum {
         Foodstuffs, //  Food items. Possibly perishable. Falls under certain rules. TBD.
         Medical,    //  Medical products. Possibly perishable. Falls under certain rules. TBD.

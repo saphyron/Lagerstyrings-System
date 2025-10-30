@@ -1,3 +1,9 @@
+/** \file Program.cs
+ *  \brief API startup and endpoint registration.
+ *  \remarks
+ *  Configures dependency injection, JWT authentication, authorization, and maps endpoint groups for
+ *  users, authentication, orders, order items, warehouses, products, and warehouse products.
+ */
 using LagerstyringsSystem.Database;
 using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
 using Microsoft.AspNetCore.Authentication.JwtBearer;

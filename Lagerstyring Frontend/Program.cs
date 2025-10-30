@@ -1,3 +1,9 @@
+/** \file Program.cs
+ *  \brief Frontend Razor Pages startup and authentication configuration.
+ *  \remarks
+ *  Configures Razor Pages conventions, JWT bearer authentication from an AuthToken cookie,
+ *  authorization, HttpClient for backend API calls, and maps Razor pages.
+ */
 using System.Text;
 using System.IdentityModel.Tokens.Jwt;                 
 using Microsoft.AspNetCore.Authentication.JwtBearer;

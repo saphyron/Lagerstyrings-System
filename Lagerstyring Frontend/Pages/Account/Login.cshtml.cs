@@ -7,17 +7,37 @@ using Microsoft.AspNetCore.Authorization;
 namespace LagerstyringFrontend.Pages.Account;
 
 [AllowAnonymous]
+/// <summary>
+/// Razor PageModel handling user login and JWT cookie issuance.
+/// </summary>
+/// <remarks>
+/// Posts credentials to the backend API, reads the token from the JSON response, and stores it in an HttpOnly cookie.
+/// </remarks>
 public class LoginModel : PageModel
 {
     private readonly IHttpClientFactory _factory;
+    /// <summary>
+    /// Initializes the login page with an HTTP client factory.
+    /// </summary>
+    /// <param name="factory">Factory used to create an API HttpClient.</param>
     public LoginModel(IHttpClientFactory factory) => _factory = factory;
-
+    /// <summary>Entered username.</summary>
     [BindProperty] public string Username { get; set; } = "";
+    /// <summary>Entered password.</summary>
     [BindProperty] public string Password { get; set; } = "";
+    /// <summary>Error message to display when login fails.</summary>
     public string? Error { get; private set; }
-
+    /// <summary>
+    /// Handles GET requests to render the login page.
+    /// </summary>
     public void OnGet() { }
-
+    /// <summary>
+    /// Handles POST requests to authenticate and set the JWT cookie.
+    /// </summary>
+    /// <returns>A redirect to the admin index on success; the same page on failure.</returns>
+    /// <remarks>
+    /// Reads a "token" property from the response JSON and writes it to the AuthToken cookie with strict policies.
+    /// </remarks>
     public async Task<IActionResult> OnPostAsync()
     {
         var client = _factory.CreateClient("Api");
