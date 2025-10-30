@@ -1,7 +1,5 @@
 ﻿using LagerstyringsSystem.Database;
 using Dapper;
-using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
-using Lagerstyrings_System;
 
 namespace Lagerstyrings_System
 {
@@ -112,7 +110,7 @@ namespace Lagerstyrings_System
         public int ProductId { get; set; }
         /// <summary>
         /// Number of products within the stock-keeping unit.
-        /// Cannot be negative.
+        /// Can be negative. (for now to make things easier)
         /// </summary>
         public int Quantity { get; set; }
 

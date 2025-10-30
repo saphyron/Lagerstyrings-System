@@ -1,7 +1,5 @@
 ﻿using LagerstyringsSystem.Database;
 using Dapper;
-using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
-using Lagerstyrings_System;
 
 namespace Lagerstyrings_System
 {
@@ -81,7 +79,7 @@ namespace Lagerstyrings_System
         public int Id { get; set; }
         public string Name { get; set; }
 
-        public List<WarehouseProduct> WarehouseProducts { get; set; } = new List<WarehouseProduct>();
+        public List<WarehouseProduct> WarehouseProducts { get; set; } = new();
         public Warehouse() { }
 
         /// <summary>
@@ -96,9 +94,6 @@ namespace Lagerstyrings_System
         /// Create new, empty SKU object assigned to this Warehouse.
         /// This SKU has no assigned Product, and holds no items.
         /// </summary>
-        public void AddSku()
-        {
-            throw new NotImplementedException();
-        }
+        public void AddSku() => throw new NotImplementedException();
     }
 }
