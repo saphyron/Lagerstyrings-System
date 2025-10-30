@@ -24,6 +24,7 @@ namespace LagerstyringsSystem.Endpoints
                     var order = await repository.GetOrderByIdAsync(orderId);
                     return order is null ? TypedResults.NotFound() : TypedResults.Ok(order);
                 });
+            //todo: get all orders
 
             // GET /orders/by-user/{userId}
             group.MapGet("/by-user/{userId:int}",

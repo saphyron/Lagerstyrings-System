@@ -208,3 +208,7 @@ PRINT N'== Open orders (not shipped/cancelled) ==';
 SELECT * FROM dbo.vw_OpenOrders ORDER BY CreatedAt DESC;
 
 /* End of seed */
+
+
+
+select * from dbo.Users
