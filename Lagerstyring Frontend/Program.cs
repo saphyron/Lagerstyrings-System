@@ -8,8 +8,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 var builder = WebApplication.CreateBuilder(args);
 
 // ----------------------- Razor Pages + auth-konventioner -----------------------
-builder.Services.AddRazorPages(opts =>
-{
+builder.Services.AddRazorPages(opts => {
     // All pages require auth...
     opts.Conventions.AuthorizeFolder("/");
 
@@ -41,10 +40,8 @@ static string KeyFingerprint(string key)
 
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(o =>
-    {
-        o.TokenValidationParameters = new()
-        {
+    .AddJwtBearer(o => {
+        o.TokenValidationParameters = new() {
             ValidIssuer = issuer,
             ValidAudience = audience,
             IssuerSigningKey = signing,

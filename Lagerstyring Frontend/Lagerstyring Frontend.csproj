@@ -10,8 +10,9 @@
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.10" />
     <PackageReference Include="Microsoft.Data.SqlClient" Version="6.1.2" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.14.0" />
-  <ProjectReference Include="..\LagerstyringsSystem\LagerstyringsSystem.csproj" />
-</ItemGroup>
-
+  </ItemGroup>
+    <ItemGroup>
+      <ProjectReference Include="..\Lagerstyrings System\Lagerstyrings System.csproj" />
+    </ItemGroup>
 
 </Project>
