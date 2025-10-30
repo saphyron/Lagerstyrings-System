@@ -20,7 +20,7 @@ public class LoginModel : PageModel
 
     public async Task<IActionResult> OnPostAsync()
     {
-        var client = _factory.CreateClient("Self");
+        var client = _factory.CreateClient("Api");
 
         var resp = await client.PostAsJsonAsync("/auth/users/login", new { username = Username, password = Password });
 
