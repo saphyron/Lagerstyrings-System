@@ -81,8 +81,6 @@ namespace Lagerstyrings_System
 
         public List<WarehouseProduct> WarehouseProducts { get; set; } = new();
         public Warehouse() { }
-
-        public Warehouse() {}
         /// <summary>
         /// Create a new Warehouse object with a database parallel of given name.
         /// </summary>
