@@ -38,7 +38,6 @@ static string KeyFingerprint(string key)
     return Convert.ToHexString(hash); // f.eks. "A1B2C3..."
 }*/
 
-
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(o => {
         o.TokenValidationParameters = new() {

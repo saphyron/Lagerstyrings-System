@@ -1,0 +1,31 @@
+@page
+@model LagerstyringFrontend.Pages.Warehouse.WarehouseModel
+@{
+    ViewData["Title"] = "Lagere";
+}
+
+<html>
+<head>
+  <h1 style="text-align: center">Lagere:</h1>
+</head>
+<body>
+  <table class="table" id="WareTable">
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Navn</th>
+        <th>Detaljer</th>
+      </tr>
+    </thead>
+    <tbody>
+    @foreach (var warehouse in Model.Warehouses) {
+        <tr>
+          <td>@warehouse.Id</td>
+          <td>@warehouse.Name</td>
+          <td><a asp-page="WarehouseView" asp-route-id="@warehouse.Id">Detaljer</a></td>
+        </tr>
+    }
+    </tbody>
+  </table>
+</body>
+</html>
