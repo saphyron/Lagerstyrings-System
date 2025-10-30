@@ -1,0 +1,37 @@
+@page
+@model LagerstyringFrontend.Pages.Order.CreateOrderModel
+@{
+    ViewData["Title"] = "Opret ordre";
+}
+
+<html>
+<head>
+<h1 style="text-align: center">Opret ordre</h1>
+</head>
+<body>
+<form method="POST">
+<div id="OrdreTypes">
+<label for="OrderTypes">Ordre type:</label>
+<select id="Types" name="Types" onchange="updateForm()">
+@foreach(var type in Model.typer) {
+    <option value="@type">@type</option>
+}
+</select>
+</div>
+<div id="fromWarehouse" style="display: block;">
+<label for="fromWarehouse">Fra lager:</label>
+<select id="From" name="FromInput">
+</select>
+</div>
+<div id="toWarehouse" style="display: block;">
+<label for="toWarehouse">Til lager:</label>
+<select id="Towards" name="ToInput">
+</select>
+<div id="AttachedUser">
+</div>
+</div>
+</form>
+<script>
+</script>
+</body>
+</html>
