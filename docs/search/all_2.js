@@ -1,9 +1,7 @@
 var searchData=
 [
-  ['code_20structure_0',['Code Structure',['../md__r_e_a_d_m_e.html#autotoc_md4',1,'']]],
-  ['collections_1',['HTTPie Collections',['../md__r_e_a_d_m_e.html#autotoc_md20',1,'']]],
-  ['commit_20history_2',['Commit History',['../md__r_e_a_d_m_e.html#autotoc_md22',1,'']]],
-  ['configuration_3',['Configuration',['../md__r_e_a_d_m_e.html#autotoc_md6',1,'']]],
-  ['cookies_4',['Known cookies',['../md__r_e_a_d_m_e.html#autotoc_md26',1,'']]],
-  ['creating_20a_20user_20and_20logging_20in_5',['Creating a User and Logging In',['../md__r_e_a_d_m_e.html#autotoc_md13',1,'']]]
+  ['backend_20api_20minimal_20api_0',['Backend API (Minimal API)',['../md__r_e_a_d_m_e.html#autotoc_md12',1,'']]],
+  ['backend_20lagerstyrings_20system_20appsettings_20json_1',['Backend (&lt;span class=&quot;tt&quot;&gt;Lagerstyrings System/appsettings*.json&lt;/span&gt;)',['../md__r_e_a_d_m_e.html#autotoc_md8',1,'']]],
+  ['build_20and_20launch_2',['How to Build and Launch',['../md__r_e_a_d_m_e.html#autotoc_md11',1,'']]],
+  ['by_20tests_3',['Environment variables used by tests',['../md__r_e_a_d_m_e.html#autotoc_md18',1,'']]]
 ];

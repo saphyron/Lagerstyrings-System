@@ -1,5 +1,4 @@
 var searchData=
 [
-  ['known_20cookies_0',['Known cookies',['../md__r_e_a_d_m_e.html#autotoc_md26',1,'']]],
-  ['known_20issues_1',['Known issues',['../md__r_e_a_d_m_e.html#autotoc_md27',1,'']]]
+  ['json_0',['json',['../md__r_e_a_d_m_e.html#autotoc_md8',1,'Backend (<span class="tt">Lagerstyrings System/appsettings*.json</span>)'],['../md__r_e_a_d_m_e.html#autotoc_md9',1,'Frontend (<span class="tt">Lagerstyring Frontend/appsettings*.json</span>)']]]
 ];

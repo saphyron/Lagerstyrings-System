@@ -1,5 +1,26 @@
 var searchData=
 [
-  ['—_20er‑diagram_20ms_20sql_20sql_20server_0',['Lagerstyrings System — ER‑diagram &amp;amp; MS-SQL (SQL Server)',['../md__e_r-_diagram.html',1,'']]],
-  ['—_20readme_1',['Lagerstyrings-System — README',['../md__r_e_a_d_m_e.html',1,'']]]
+  ['update_0',['Update',['../class_tests_1_1_spectests_1_1_auth_roles_contract_tests.html#a201e6df2e10df33284120d9c6ac0950d',1,'Tests.Spectests.AuthRolesContractTests.Update()'],['../class_tests_1_1_spectests_1_1_order_items_contract_tests.html#a433736950389ee06478ae6255abb4a5f',1,'Tests.Spectests.OrderItemsContractTests.Update()'],['../class_tests_1_1_spectests_1_1_orders_contract_tests.html#a7370d7532ea8bfa6f05dd5adca1768a3',1,'Tests.Spectests.OrdersContractTests.Update()'],['../class_tests_1_1_spectests_1_1_products_contract_tests.html#acba96d77514f944bdd7621ad88fa41a3',1,'Tests.Spectests.ProductsContractTests.Update()'],['../class_tests_1_1_spectests_1_1_warehouses_contract_tests.html#ab2b43f78c98ebb55c30327b7c431e7e9',1,'Tests.Spectests.WarehousesContractTests.Update()'],['../class_tests_1_1_spectests_1_1_warehouse_products_contract_tests.html#a5952e44826bc6c90c4fd048f0edeff08',1,'Tests.Spectests.WarehouseProductsContractTests.Update()']]],
+  ['updateorderasync_1',['UpdateOrderAsync',['../class_lagerstyrings_system_1_1_orders_1_1_order_repository.html#aa7a99938e720426138bc49843ab77ae5',1,'LagerstyringsSystem::Orders::OrderRepository']]],
+  ['updateorderitemasync_2',['UpdateOrderItemAsync',['../class_lagerstyrings_system_1_1_orders_1_1_order_item_repository.html#aac16b87e10774c5e481dc756b6ca088f',1,'LagerstyringsSystem::Orders::OrderItemRepository']]],
+  ['updateorderstatusasync_3',['UpdateOrderStatusAsync',['../class_lagerstyrings_system_1_1_orders_1_1_order_repository.html#a55b378d43e0ed63e21d88249cd13ef3f',1,'LagerstyringsSystem::Orders::OrderRepository']]],
+  ['updateproductasync_4',['UpdateProductAsync',['../class_lagerstyrings___system_1_1_product_repository.html#a693e2ecdf74e1c4c7ded9dfb8d9bb3d7',1,'Lagerstyrings_System::ProductRepository']]],
+  ['updaterolerequest_5',['UpdateRoleRequest',['../class_lagerstyrings_system_1_1_endpoints_1_1_authentication_endpoints_1_1_auth_endpoints_1_1_update_role_request.html',1,'LagerstyringsSystem::Endpoints::AuthenticationEndpoints::AuthEndpoints']]],
+  ['updateuserrequest_6',['UpdateUserRequest',['../class_lagerstyrings_system_1_1_endpoints_1_1_authentication_endpoints_1_1_user_endpoints_1_1_update_user_request.html',1,'LagerstyringsSystem::Endpoints::AuthenticationEndpoints::UserEndpoints']]],
+  ['updatewarehouseasync_7',['UpdateWarehouseAsync',['../class_lagerstyrings___system_1_1_warehouse_repository.html#a1dabdf20a729220429fa0a6afb8359ff',1,'Lagerstyrings_System::WarehouseRepository']]],
+  ['updatewarehouseproductasync_8',['UpdateWarehouseProductAsync',['../class_lagerstyrings___system_1_1_warehouse_product_repository.html#a79bb44adbbfd41c2384cd9229bbde084',1,'Lagerstyrings_System::WarehouseProductRepository']]],
+  ['used_20by_20tests_9',['Environment variables used by tests',['../md__r_e_a_d_m_e.html#autotoc_md18',1,'']]],
+  ['user_10',['User',['../class_lagerstyrings_system_1_1src_1_1_user_1_1_user.html',1,'LagerstyringsSystem::src::User']]],
+  ['user_20and_20logging_20in_11',['Creating a User and Logging In',['../md__r_e_a_d_m_e.html#autotoc_md14',1,'']]],
+  ['username_12',['Username',['../class_lagerstyring_frontend_1_1_pages_1_1_account_1_1_login_model.html#ac136a043b3fe28a08b60145e58cd2dd0',1,'LagerstyringFrontend.Pages.Account.LoginModel.Username'],['../class_lagerstyrings_system_1_1src_1_1_user_1_1_user.html#af120a3d7c17a43ab37a0243d51d5bff9',1,'LagerstyringsSystem.src.User.User.Username']]],
+  ['users_13',['Users',['../class_lagerstyring___frontend_1_1_pages_1_1_admin_1_1_users_model.html#a8ea6299214b1ce12a1876dac1fc2621a',1,'Lagerstyring_Frontend::Pages::Admin::UsersModel']]],
+  ['users_20login_14',['POST /auth/users/login',['../class_lagerstyrings_system_1_1_endpoints_1_1_authentication_endpoints_1_1_user_endpoints.html#autotoc_md3',1,'']]],
+  ['users_5fcreate_15',['Users_Create',['../class_tests_1_1_spectests_1_1_users_contract_tests.html#a7ca70b3d076da0cbae564be8ae44911f',1,'Tests::Spectests::UsersContractTests']]],
+  ['users_5fdelete_16',['Users_Delete',['../class_tests_1_1_spectests_1_1_users_contract_tests.html#adb9f58bd41707c98cb66142661e7af9d',1,'Tests::Spectests::UsersContractTests']]],
+  ['users_5fget_5fby_5fid_17',['Users_Get_By_Id',['../class_tests_1_1_spectests_1_1_users_contract_tests.html#abac767f66f1fd75d6b08f2f306e7621b',1,'Tests::Spectests::UsersContractTests']]],
+  ['users_5flist_18',['Users_List',['../class_tests_1_1_spectests_1_1_users_contract_tests.html#ac5bb21e81934af322ad57b347f55ae0d',1,'Tests::Spectests::UsersContractTests']]],
+  ['users_5fupdate_19',['Users_Update',['../class_tests_1_1_spectests_1_1_users_contract_tests.html#a3c37a4d4086be286734acf64d7f942d9',1,'Tests::Spectests::UsersContractTests']]],
+  ['userscontracttests_20',['UsersContractTests',['../class_tests_1_1_spectests_1_1_users_contract_tests.html',1,'Tests::Spectests']]],
+  ['usersmodel_21',['UsersModel',['../class_lagerstyring___frontend_1_1_pages_1_1_admin_1_1_users_model.html',1,'Lagerstyring_Frontend.Pages.Admin.UsersModel'],['../class_lagerstyring___frontend_1_1_pages_1_1_admin_1_1_users_model.html#a7c56dc68bfc2217c9e2de9f2e18bb40d',1,'Lagerstyring_Frontend.Pages.Admin.UsersModel.UsersModel()']]],
+  ['usersummary_22',['UserSummary',['../class_lagerstyrings_system_1_1_endpoints_1_1_authentication_endpoints_1_1_user_endpoints_1_1_user_summary.html',1,'LagerstyringsSystem::Endpoints::AuthenticationEndpoints::UserEndpoints']]]
 ];

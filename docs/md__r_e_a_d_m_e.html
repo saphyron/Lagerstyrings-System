@@ -92,9 +92,9 @@ $(function(){initNavTree('md__r_e_a_d_m_e.html','',''); });
   <div class="headertitle"><div class="title">Lagerstyrings-System — README </div></div>
 </div><!--header-->
 <div class="contents">
-<div class="textblock"><p><a class="anchor" id="autotoc_md3"></a></p>
+<div class="textblock"><p><a class="anchor" id="autotoc_md4"></a></p>
 <p><b>Legend:</b> 📁 Folder • 🧩 C#-Code • ⚙️ config/json • 🪪 .sln/.csproj • 🧾 README/MD</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md4"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md5"></a>
 Code Structure</h1>
 <div class="fragment"><div class="line">📁 Lagerstyrings-System/</div>
 <div class="line">├─ 🪪 Lagerstyrings System.slnx</div>
@@ -199,7 +199,7 @@ Code Structure</h1>
 <div class="line">         ├─ 🧩 ProductsContractTests.cs</div>
 <div class="line">         ├─ 🧩 WarehouseContractTests.cs</div>
 <div class="line">         └─ 🧩 WarehouseProducts.cs</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md5"></a>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md6"></a>
 System Requirements</h1>
 <ul>
 <li><b>.NET SDK:</b> 9.0 (backend and frontend target <span class="tt">net9.0</span>).</li>
@@ -208,15 +208,15 @@ System Requirements</h1>
 <li><b>PowerShell:</b> Windows PowerShell 5.1 (for <span class="tt">Scripts\Tests.ps1</span>).</li>
 <li><b>Optional:</b> HTTPie Desktop/CLI to use the included HTTP collections.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md6"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md7"></a>
 Configuration</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md7"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md8"></a>
 Backend (<span class="tt">Lagerstyrings System/appsettings*.json</span>)</h2>
 <ul>
 <li><span class="tt">ConnectionStrings:Default</span> — SQL Server connection string.</li>
 <li><span class="tt">Jwt:Issuer</span>, <span class="tt">Jwt:Audience</span>, <span class="tt">Jwt:Key</span> — JWT settings used by both API and frontend.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md8"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md9"></a>
 Frontend (<span class="tt">Lagerstyring Frontend/appsettings*.json</span>)</h2>
 <ul>
 <li><span class="tt">Api:BaseUrl</span> — base URL of the backend API (default points to <span class="tt"><a href="http://localhost:5107">http://localhost:5107</a></span>).</li>
@@ -225,7 +225,7 @@ Frontend (<span class="tt">Lagerstyring Frontend/appsettings*.json</span>)</h2>
 <blockquote class="doxtable">
 <p>Note: The frontend reads the JWT from an <b>HttpOnly cookie</b> named <b><span class="tt">AuthToken</span></b> (set on successful login). The frontend config includes authentication middleware configured for this cookie. </p>
 </blockquote>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md9"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md10"></a>
 Database Setup (SQL Server)</h1>
 <ol type="1">
 <li>Create the database:<ul>
@@ -241,9 +241,9 @@ Database Setup (SQL Server)</h1>
 </ul>
 </li>
 </ol>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md10"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md11"></a>
 How to Build and Launch</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md11"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md12"></a>
 Backend API (Minimal API)</h2>
 <ul>
 <li>Working directory: repository root.</li>
@@ -260,7 +260,7 @@ Backend API (Minimal API)</h2>
 </ul>
 </li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md12"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md13"></a>
 Frontend (Razor Pages)</h2>
 <ul>
 <li>Working directory: repository root.</li>
@@ -278,7 +278,7 @@ Frontend (Razor Pages)</h2>
 </ul>
 </li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md13"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md14"></a>
 Creating a User and Logging In</h2>
 <ul>
 <li>The <b>Users</b> table stores <span class="tt">Username</span>, <span class="tt">PasswordClear</span>, <span class="tt">AuthEnum</span>, and optional <span class="tt">WarehouseId</span> (see <span class="tt">CreateTables.sql</span>).</li>
@@ -289,7 +289,7 @@ Creating a User and Logging In</h2>
 </li>
 <li>HTTPie collections in <span class="tt">/Scripts</span> include ready-made requests for these endpoints.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md14"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md15"></a>
 API Overview (route groups)</h1>
 <p>These are registered in <span class="tt">Program.cs</span> and corresponding <span class="tt">*Endpoints.cs</span>:</p>
 <ul>
@@ -311,17 +311,17 @@ API Overview (route groups)</h1>
 <li>Other resource groups (<b>products</b>, <b>warehouses</b>, <b>orders</b>, <b>orderitems</b>, <b>warehouseproducts</b>) do not call <span class="tt">RequireAuthorization()</span> in their endpoint mapping files. </li>
 </ul>
 </blockquote>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md15"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md16"></a>
 Tests</h1>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md16"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md17"></a>
 Test Project</h2>
 <ul>
 <li>Location: <span class="tt">tests</span></li>
 <li>Framework: xUnit (<span class="tt">Test-First.csproj</span> targets <span class="tt">net8.0</span>).</li>
 <li>Contract tests exist for users, roles, orders, order-items, products, warehouses, and warehouse-products.</li>
-<li>Tests rely on environment variables for service URLs and DB connection (see below).</li>
+<li><a class="el" href="namespace_tests.html">Tests</a> rely on environment variables for service URLs and DB connection (see below).</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md17"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md18"></a>
 Environment variables used by tests</h2>
 <ul>
 <li><span class="tt">ConnectionStrings__Default</span></li>
@@ -332,14 +332,14 @@ Environment variables used by tests</h2>
 <li><span class="tt">AUTH_URL</span></li>
 <li><span class="tt">ORDERS_CLI</span> (optional; used by CLI-based helpers)</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md18"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md19"></a>
 Run tests (standard)</h2>
 <p>From repository root:</p>
 <div class="fragment"><div class="line">dotnet test tests/Test-First.csproj</div>
 </div><!-- fragment --><p>Examples with logging:</p>
 <div class="fragment"><div class="line">dotnet test tests/Test-First.csproj -l &quot;trx;LogFileName=TestResults.trx&quot;</div>
 <div class="line">dotnet test tests/Test-First.csproj --filter &quot;FullyQualifiedName~ProductsContractTests&quot;</div>
-</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md19"></a>
+</div><!-- fragment --><h2 class="doxsection"><a class="anchor" id="autotoc_md20"></a>
 Run tests via script (<span class="tt">Scripts\Tests.ps1</span>)</h2>
 <p>PowerShell 5.1 examples (from repository root):</p>
 <div class="fragment"><div class="line"># Default run</div>
@@ -363,7 +363,7 @@ Run tests via script (<span class="tt">Scripts\Tests.ps1</span>)</h2>
 <div class="line"># Filter tests (passes through to `dotnet test --filter`)</div>
 <div class="line">powershell -NoProfile -ExecutionPolicy Bypass -File .\Scripts\Tests.ps1 -Filter &quot;FullyQualifiedName~OrdersContractTests&quot;</div>
 </div><!-- fragment --><p>The script sets or echoes the environment variables listed above and orchestrates optional smoke HTTP checks before invoking <span class="tt">dotnet test</span>.</p>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md20"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md21"></a>
 HTTPie Collections</h1>
 <ul>
 <li>Location: <span class="tt">/Scripts/httpie-collection-*.json</span></li>
@@ -371,14 +371,14 @@ HTTPie Collections</h1>
 <li>Collections cover: auth roles, users, orders, order-items, products, warehouses, warehouse-products.</li>
 <li>Usage: import into HTTPie Desktop (or compatible tooling) and execute requests against the configured base URL. Some collections include a bearer token in the exported file; replace with a valid token for your environment if required.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md21"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md22"></a>
 Security Notes (as implemented)</h1>
 <ul>
 <li>The database schema includes a <span class="tt">Users</span> table with <span class="tt">PasswordClear</span> (plain-text) column (see <span class="tt">CreateTables.sql</span>).</li>
 <li>Frontend/Backend JWT settings must match; the frontend reads the token from <span class="tt">AuthToken</span> cookie.</li>
 <li>Endpoint authorization configuration is as described in <b>API Overview</b>.</li>
 </ul>
-<h1 class="doxsection"><a class="anchor" id="autotoc_md22"></a>
+<h1 class="doxsection"><a class="anchor" id="autotoc_md23"></a>
 Commit History</h1>
 <p><em>(From the repository’s git log; messages grouped by commit day.)</em></p>
 <div class="fragment"><div class="line">Commits on Oct 30, 2025</div>
@@ -430,25 +430,25 @@ Commit History</h1>
 <div class="line">    Init C# Project</div>
 <div class="line">    Update copyright holders in LICENSE file</div>
 <div class="line">    Initial commit</div>
-</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md23"></a>
+</div><!-- fragment --><h1 class="doxsection"><a class="anchor" id="autotoc_md24"></a>
 License</h1>
 <ul>
 <li>See <span class="tt">LICENSE</span> in the repository root.</li>
 </ul>
 <hr  />
-<h2 class="doxsection"><a class="anchor" id="autotoc_md25"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md26"></a>
 Notes on exact defaults and ports</h2>
 <ul>
 <li>Backend default HTTP port: <span class="tt">5107</span> (per <span class="tt">Lagerstyrings System/Properties/launchSettings.json</span>).</li>
 <li>Frontend default HTTP/HTTPS ports: <span class="tt">5267</span> / <span class="tt">7267</span> (per <span class="tt">Lagerstyring Frontend/Properties/launchSettings.json</span>).</li>
 <li>Frontend <span class="tt">Api:BaseUrl</span> default: <span class="tt"><a href="http://localhost:5107">http://localhost:5107</a></span>.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md26"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md27"></a>
 Known cookies</h2>
 <ul>
 <li><span class="tt">AuthToken</span> — JWT bearer token stored as HttpOnly cookie by the frontend on successful login.</li>
 </ul>
-<h2 class="doxsection"><a class="anchor" id="autotoc_md27"></a>
+<h2 class="doxsection"><a class="anchor" id="autotoc_md28"></a>
 Known issues</h2>
 <ul>
 <li><b>Consistent test failure (HTTP 500):</b> One automated test returns HTTP 500 when run under the test harness; the same scenario succeeds outside the tests. Root cause is under investigation.</li>

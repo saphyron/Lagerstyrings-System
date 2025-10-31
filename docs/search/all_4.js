@@ -1,7 +1,13 @@
 var searchData=
 [
-  ['environment_20variables_20used_20by_20tests_0',['Environment variables used by tests',['../md__r_e_a_d_m_e.html#autotoc_md17',1,'']]],
-  ['er‑diagram_20mermaid_1',['ER‑diagram (Mermaid)',['../md__e_r-_diagram.html#autotoc_md2',1,'']]],
-  ['er‑diagram_20ms_20sql_20sql_20server_2',['Lagerstyrings System — ER‑diagram &amp;amp; MS-SQL (SQL Server)',['../md__e_r-_diagram.html',1,'']]],
-  ['exact_20defaults_20and_20ports_3',['Notes on exact defaults and ports',['../md__r_e_a_d_m_e.html#autotoc_md25',1,'']]]
+  ['database_20setup_20sql_20server_0',['Database Setup (SQL Server)',['../md__r_e_a_d_m_e.html#autotoc_md10',1,'']]],
+  ['defaults_20and_20ports_1',['Notes on exact defaults and ports',['../md__r_e_a_d_m_e.html#autotoc_md26',1,'']]],
+  ['delete_2',['Delete',['../class_tests_1_1_spectests_1_1_auth_roles_contract_tests.html#a957f47535fef34a74ccdc01ce4ff832d',1,'Tests.Spectests.AuthRolesContractTests.Delete()'],['../class_tests_1_1_spectests_1_1_order_items_contract_tests.html#aca21c88fdf24b28c5b6abf14f8517396',1,'Tests.Spectests.OrderItemsContractTests.Delete()'],['../class_tests_1_1_spectests_1_1_orders_contract_tests.html#a03a2bbaeb04b44f7ec6f44089cff5779',1,'Tests.Spectests.OrdersContractTests.Delete()'],['../class_tests_1_1_spectests_1_1_products_contract_tests.html#a42cd62981dbd95f55914e0de2ef150cf',1,'Tests.Spectests.ProductsContractTests.Delete()'],['../class_tests_1_1_spectests_1_1_warehouses_contract_tests.html#a0badcd2b3ebdf99795a2033492830f79',1,'Tests.Spectests.WarehousesContractTests.Delete()'],['../class_tests_1_1_spectests_1_1_warehouse_products_contract_tests.html#a18e5de1afb841e99afe48d650b855f58',1,'Tests.Spectests.WarehouseProductsContractTests.Delete()']]],
+  ['deleteorderasync_3',['DeleteOrderAsync',['../class_lagerstyrings_system_1_1_orders_1_1_order_repository.html#a98911fd2bca163d2f3a0ee034a747cd0',1,'LagerstyringsSystem::Orders::OrderRepository']]],
+  ['deleteorderitemasync_4',['DeleteOrderItemAsync',['../class_lagerstyrings_system_1_1_orders_1_1_order_item_repository.html#a97c9e9c2c0d64bdb670d8b2c25494baf',1,'LagerstyringsSystem::Orders::OrderItemRepository']]],
+  ['deleteorderitemforproductasync_5',['DeleteOrderItemForProductAsync',['../class_lagerstyrings_system_1_1_orders_1_1_order_item_repository.html#a51f0f2d1f7cc43f2e7ddf8de4e5a83ad',1,'LagerstyringsSystem::Orders::OrderItemRepository']]],
+  ['deleteproductasync_6',['DeleteProductAsync',['../class_lagerstyrings___system_1_1_product_repository.html#a8baec1d50fd15470a3a1463332e506f4',1,'Lagerstyrings_System::ProductRepository']]],
+  ['deletewarehouseasync_7',['DeleteWarehouseAsync',['../class_lagerstyrings___system_1_1_warehouse_repository.html#a7ac0738fd37d9878cae8993014dc026b',1,'Lagerstyrings_System::WarehouseRepository']]],
+  ['deletewarehouseproductasync_8',['DeleteWarehouseProductAsync',['../class_lagerstyrings___system_1_1_warehouse_product_repository.html#a44827eadbd05deb12ee6445d230cdd06',1,'Lagerstyrings_System::WarehouseProductRepository']]],
+  ['displayname_9',['DisplayName',['../class_lagerstyring_frontend_1_1_pages_1_1_admin_1_1_admin_index_model.html#ab19453363323c6586f33da8a39e6d0d5',1,'LagerstyringFrontend::Pages::Admin::AdminIndexModel']]]
 ];

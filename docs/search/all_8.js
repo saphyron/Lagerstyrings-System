@@ -1,6 +1,6 @@
 var searchData=
 [
-  ['implemented_0',['Security Notes (as implemented)',['../md__r_e_a_d_m_e.html#autotoc_md21',1,'']]],
-  ['in_1',['Creating a User and Logging In',['../md__r_e_a_d_m_e.html#autotoc_md13',1,'']]],
-  ['issues_2',['Known issues',['../md__r_e_a_d_m_e.html#autotoc_md27',1,'']]]
+  ['history_0',['Commit History',['../md__r_e_a_d_m_e.html#autotoc_md23',1,'']]],
+  ['how_20to_20build_20and_20launch_1',['How to Build and Launch',['../md__r_e_a_d_m_e.html#autotoc_md11',1,'']]],
+  ['httpie_20collections_2',['HTTPie Collections',['../md__r_e_a_d_m_e.html#autotoc_md21',1,'']]]
 ];
