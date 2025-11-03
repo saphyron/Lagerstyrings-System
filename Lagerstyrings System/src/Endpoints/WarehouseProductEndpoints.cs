@@ -34,7 +34,7 @@ namespace LagerstyringsSystem.Endpoints
                 return warehouseProducts;
             });
 
-            group.MapGet("/{warehouseId}/warehouseproducts",
+            group.MapGet("/by-warehouse/{warehouseId}",
             async (int warehouseId, WarehouseProductRepository repository) =>
             {
                 var warehouseProducts = await repository.GetWarehouseProductsByWarehouseIdAsync(warehouseId);

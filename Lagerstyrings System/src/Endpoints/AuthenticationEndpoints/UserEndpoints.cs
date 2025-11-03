@@ -93,7 +93,7 @@ namespace LagerstyringsSystem.Endpoints.AuthenticationEndpoints
                     var sql = @"SELECT Id, Username, AuthEnum FROM dbo.Users ORDER BY Id;";
                     var users = await conn.QueryAsync<PublicUserDto>(sql);
                     return Results.Ok(users);
-                });
+                }).AllowAnonymous();
 
             // ------------------------
             // GET /auth/users/{id}

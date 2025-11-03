@@ -9,7 +9,6 @@
 <h1 style="text-align: center">Opret ordre</h1>
 </head>
 <body>
-<form method="POST">
 <div id="OrdreTypes">
 <label for="OrderTypes">Ordre type:</label>
 <select id="Types" name="Types" onchange="updateForm()">
@@ -19,18 +18,25 @@
 </select>
 </div>
 <div id="fromWarehouse" style="display: block;">
-<label for="fromWarehouse">Fra lager:</label>
-<select id="From" name="FromInput">
+<label for="FromWarehouse">Fra lager:</label>
+<select id="FromWarehouse" name="FromWarehouse" asp-items="Model.WarehouseList">
 </select>
 </div>
 <div id="toWarehouse" style="display: block;">
-<label for="toWarehouse">Til lager:</label>
-<select id="Towards" name="ToInput">
+<label for="ToWarehouse">Til lager:</label>
+<select id="ToWarehouse" name="ToWarehouse" asp-items="Model.WarehouseList">
 </select>
 <div id="AttachedUser">
+<label for="OrderUser">Bruger:</label>
+<select id="OrderUser" name="OrderUser" asp-items="Model.UsersList">
+</select>
 </div>
 </div>
+<div id="Create">
+<form method="post">
+<button>Opret</button>
 </form>
+</div>
 <script>
 </script>
 </body>

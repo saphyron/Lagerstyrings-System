@@ -60,9 +60,9 @@ namespace LagerstyringFrontend.Pages.Warehouse
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public char Type { get; set; }
+        public string Type { get; set; }
 
-        public ProductItem(int id, string name, char type)
+        public ProductItem(int id, string name, string type)
         {
             Id = id;
             Name = name;
@@ -90,10 +90,10 @@ namespace LagerstyringFrontend.Pages.Warehouse
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public char Type { get; set; }
+        public string Type { get; set; }
         public int Quantity { get; set; }
 
-        public ProductListItem(int id, string name, char type, int quantity)
+        public ProductListItem(int id, string name, string type, int quantity)
         {
             Id = id;
             Name = name;
