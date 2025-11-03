@@ -1,8 +1,6 @@
 using LagerstyringsSystem.Database;
 using Dapper;
-using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
-using Lagerstyrings_System;
-using System.ComponentModel;
+
 
 namespace LagerstyringsSystem.Orders
 {
@@ -13,40 +11,38 @@ namespace LagerstyringsSystem.Orders
         public OrderItemRepository(ISqlConnectionFactory factory)
         => _factory = factory;
 
-        public async Task<int> CreateOrderItemAsync(OrderItem item)
+        public async Task<long> CreateOrderItemAsync(OrderItem item)
         {
             var sql = @"
                 INSERT INTO dbo.OrderItems (OrderId, ProductId, ItemCount)
                 VALUES (@OrderId, @ProductId, @ItemCount);
-                SELECT CAST(SCOPE_IDENTITY() as int);";
+                SELECT CAST(SCOPE_IDENTITY() as bigint);";
 
             using var conn = _factory.Create();
             conn.Open();
 
-            var orderItemId = await conn.ExecuteScalarAsync<int>(sql, item);
-            return orderItemId;
+            var newId = await conn.ExecuteScalarAsync<long>(sql, item);
+            return newId;
         }
 
-        public async Task<IEnumerable<OrderItem>> GetOrderItemsByOrderIdAsync(int orderId)
+        public async Task<IEnumerable<OrderItem>> GetOrderItemsByOrderIdAsync(long orderId)
         {
             var sql = "SELECT * FROM dbo.OrderItems WHERE OrderId = @orderId;";
 
             using var conn = _factory.Create();
             conn.Open();
 
-            var items = await conn.QueryAsync<OrderItem>(sql, new { orderId });
-            return items;
+            return await conn.QueryAsync<OrderItem>(sql, new { orderId });
         }
 
-        public async Task<int> GetOrderItemCountAsync(int orderId, int productId)
+        public async Task<int?> GetOrderItemCountAsync(long orderId, int productId)
         {
             var sql = "SELECT ItemCount FROM dbo.OrderItems WHERE OrderId = @orderId AND ProductId = @productId;";
 
             using var conn = _factory.Create();
             conn.Open();
 
-            var itemCount = await conn.QuerySingleOrDefaultAsync<int>(sql, new { orderId, productId });
-            return itemCount;
+            return await conn.QuerySingleOrDefaultAsync<int?>(sql, new { orderId, productId });
         }
 
         public async Task<bool> UpdateOrderItemAsync(OrderItem item)
@@ -63,7 +59,7 @@ namespace LagerstyringsSystem.Orders
             return affectedRows > 0;
         }
 
-        public async Task<bool> DeleteOrderItemAsync(int orderItemId)
+        public async Task<bool> DeleteOrderItemAsync(long orderItemId)
         {
             var sql = "DELETE FROM dbo.OrderItems WHERE Id = @orderItemId;";
 
@@ -74,7 +70,7 @@ namespace LagerstyringsSystem.Orders
             return affectedRows > 0;
         }
 
-        public async Task<bool> DeleteOrderItemForProductAsync(int orderId, int productId)
+        public async Task<bool> DeleteOrderItemForProductAsync(long orderId, int productId)
         {
             var sql = "DELETE FROM dbo.OrderItems WHERE OrderId = @orderId AND ProductId = @productId;";
 
@@ -88,14 +84,13 @@ namespace LagerstyringsSystem.Orders
 
     public class OrderItem
     {
-        //private readonly OrderItemRepository _orderItemRepository;
-
-        public int OrderId { get; set; }
+        public long Id { get; set; }
+        public long OrderId { get; set; }
         public int ProductId { get; set; }
         public int ItemCount { get; set; }
-        public OrderItem() {}
 
-        public OrderItem(int orderId, int productId, int itemCount)
+        public OrderItem() { }
+        public OrderItem(long orderId, int productId, int itemCount)
         {
             OrderId = orderId;
             ProductId = productId;
@@ -104,7 +99,6 @@ namespace LagerstyringsSystem.Orders
 
         public decimal ReturnTotalPrice()
         {
-            // Logic to calculate price based on product and quantity
             throw new NotImplementedException();
         }
     }

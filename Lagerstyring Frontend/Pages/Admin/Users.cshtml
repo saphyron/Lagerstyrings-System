@@ -1,0 +1,37 @@
+﻿@page
+@using LagerstyringsSystem.src.User
+@model Lagerstyring_Frontend.Pages.Admin.UsersModel
+@{
+    ViewData["Title"] = "User";
+}
+
+<form>
+    <div>
+        <div>
+            <!-- Buttons to control go here -->
+            <button action="">New user</button>
+        </div>
+        <div>
+            <!-- Table of view's content (should probably be a 'component') -->
+            <table>
+                <tr>
+                    @foreach (String userColumnName in Model.ColumnNames) {
+                        <th>@userColumnName</th>
+                    }
+                </tr>
+
+                @foreach (User user in Model.Users) {
+                    <tr>
+                        <td>
+                            @user.Id
+                        </td>
+
+                        <td>
+                            @user.Username
+                        </td>
+                    </tr>
+                }
+            </table>
+        </div>
+    </div>
+</form>

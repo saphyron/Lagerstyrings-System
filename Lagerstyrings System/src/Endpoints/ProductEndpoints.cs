@@ -1,8 +1,4 @@
-using System.Text;
-using Dapper;
-using LagerstyringsSystem.Database;
 using Microsoft.AspNetCore.Http.HttpResults;
-using LagerstyringsSystem.Orders;
 using Lagerstyrings_System;
 
 namespace LagerstyringsSystem.Endpoints
@@ -14,52 +10,46 @@ namespace LagerstyringsSystem.Endpoints
             var group = routes.MapGroup("/products").WithTags("Products");
 
             group.MapPost("/",
-            async (Product product, ProductRepository repository) =>
-            {
-                var productId = await repository.CreateProductAsync(product);
-                return Results.Created($"/products/{productId}", productId);
-            });
+                async (Product product, ProductRepository repository) =>
+                {
+                    var id = await repository.CreateProductAsync(product);
+                    return Results.Created($"/products/{id}", id);
+                });
 
-            group.MapGet("/{productId}",
-            async Task<Results<Ok<Product>, NotFound>> (int productId, ProductRepository repository) =>
-            {
-                var product = await repository.GetProductByIdAsync(productId);
-                return product is null ? TypedResults.NotFound() : TypedResults.Ok(product);
-            });
+            group.MapGet("/{productId:int}",
+                async Task<Results<Ok<Product>, NotFound>> (int productId, ProductRepository repository) =>
+                {
+                    var product = await repository.GetProductByIdAsync(productId);
+                    return product is null ? TypedResults.NotFound() : TypedResults.Ok(product);
+                });
 
             group.MapGet("/",
-            async (ProductRepository repository) =>
-            {
-                var products = await repository.GetAllProductsAsync();
-                return products;
-            });
-
-            group.MapPut("/{productId}",
-            async (int productId, Product updatedProduct, ProductRepository repository) =>
-            {
-                var existingProduct = await repository.GetProductByIdAsync(productId);
-                if (existingProduct is null)
+                async (ProductRepository repository) =>
                 {
-                    return Results.NotFound();
-                }
+                    var products = await repository.GetAllProductsAsync();
+                    return Results.Ok(products);
+                });
 
-                updatedProduct.Id = productId;
-                var success = await repository.UpdateProductAsync(updatedProduct);
-                return success ? Results.NoContent() : Results.StatusCode(500);
-            });
-
-            group.MapDelete("/{productId}",
-            async (int productId, ProductRepository repository) =>
-            {
-                var existingProduct = await repository.GetProductByIdAsync(productId);
-                if (existingProduct is null)
+            group.MapPut("/{productId:int}",
+                async (int productId, Product updated, ProductRepository repository) =>
                 {
-                    return Results.NotFound();
-                }
+                    var existing = await repository.GetProductByIdAsync(productId);
+                    if (existing is null) return Results.NotFound();
 
-                var success = await repository.DeleteProductAsync(productId);
-                return success ? Results.NoContent() : Results.StatusCode(500);
-            });
+                    updated.Id = productId;
+                    var ok = await repository.UpdateProductAsync(updated);
+                    return ok ? Results.NoContent() : Results.StatusCode(500);
+                });
+
+            group.MapDelete("/{productId:int}",
+                async (int productId, ProductRepository repository) =>
+                {
+                    var existing = await repository.GetProductByIdAsync(productId);
+                    if (existing is null) return Results.NotFound();
+
+                    var ok = await repository.DeleteProductAsync(productId);
+                    return ok ? Results.NoContent() : Results.StatusCode(500);
+                });
 
             return group;
         }

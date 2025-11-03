@@ -1,8 +1,4 @@
-using System.Text;
-using Dapper;
-using LagerstyringsSystem.Database;
 using Microsoft.AspNetCore.Http.HttpResults;
-using LagerstyringsSystem.Orders;
 using Lagerstyrings_System;
 
 namespace LagerstyringsSystem.Endpoints
@@ -13,54 +9,47 @@ namespace LagerstyringsSystem.Endpoints
         {
             var group = routes.MapGroup("/warehouses").WithTags("Warehouses");
 
-            //POST /warehouses
             group.MapPost("/",
-            async (Warehouse warehouse, WarehouseRepository repository) =>
-            {
-                var warehouseId = await repository.CreateWarehouseAsync(warehouse);
-                return Results.Created($"/warehouses/{warehouseId}", warehouseId);
-            });
+                async (Warehouse warehouse, WarehouseRepository repository) =>
+                {
+                    var id = await repository.CreateWarehouseAsync(warehouse);
+                    return Results.Created($"/warehouses/{id}", id);
+                });
 
-            group.MapGet("/{warehouseId}",
-            async Task<Results<Ok<Warehouse>, NotFound>> (int warehouseId, WarehouseRepository repository) =>
-            {
-                var warehouse = await repository.GetWarehouseByIdAsync(warehouseId);
-                return warehouse is null ? TypedResults.NotFound() : TypedResults.Ok(warehouse);
-            });
+            group.MapGet("/{warehouseId:int}",
+                async Task<Results<Ok<Warehouse>, NotFound>> (int warehouseId, WarehouseRepository repository) =>
+                {
+                    var warehouse = await repository.GetWarehouseByIdAsync(warehouseId);
+                    return warehouse is null ? TypedResults.NotFound() : TypedResults.Ok(warehouse);
+                });
 
             group.MapGet("/",
-            async (WarehouseRepository repository) =>
-            {
-                var warehouses = await repository.GetAllWarehousesAsync();
-                return Results.Ok(warehouses);
-            });
-
-            group.MapPut("/{warehouseId}",
-            async (int warehouseId, Warehouse updatedWarehouse, WarehouseRepository repository) =>
-            {
-                var existingWarehouse = await repository.GetWarehouseByIdAsync(warehouseId);
-                if (existingWarehouse is null)
+                async (WarehouseRepository repository) =>
                 {
-                    return Results.NotFound();
-                }
+                    var warehouses = await repository.GetAllWarehousesAsync();
+                    return Results.Ok(warehouses);
+                });
 
-                updatedWarehouse.Id = warehouseId;
-                var success = await repository.UpdateWarehouseAsync(updatedWarehouse);
-                return success ? Results.NoContent() : Results.StatusCode(500);
-            });
-
-            group.MapDelete("/{warehouseId}",
-            async (int warehouseId, WarehouseRepository repository) =>
-            {
-                var existingWarehouse = await repository.GetWarehouseByIdAsync(warehouseId);
-                if (existingWarehouse is null)
+            group.MapPut("/{warehouseId:int}",
+                async (int warehouseId, Warehouse updated, WarehouseRepository repository) =>
                 {
-                    return Results.NotFound();
-                }
+                    var existing = await repository.GetWarehouseByIdAsync(warehouseId);
+                    if (existing is null) return Results.NotFound();
 
-                var success = await repository.DeleteWarehouseAsync(warehouseId);
-                return success ? Results.NoContent() : Results.StatusCode(500);
-            });
+                    updated.Id = warehouseId;
+                    var ok = await repository.UpdateWarehouseAsync(updated);
+                    return ok ? Results.NoContent() : Results.StatusCode(500);
+                });
+
+            group.MapDelete("/{warehouseId:int}",
+                async (int warehouseId, WarehouseRepository repository) =>
+                {
+                    var existing = await repository.GetWarehouseByIdAsync(warehouseId);
+                    if (existing is null) return Results.NotFound();
+
+                    var ok = await repository.DeleteWarehouseAsync(warehouseId);
+                    return ok ? Results.NoContent() : Results.StatusCode(500);
+                });
 
             return group;
         }

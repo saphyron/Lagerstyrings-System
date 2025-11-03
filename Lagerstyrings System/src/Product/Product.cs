@@ -1,7 +1,5 @@
 ﻿using LagerstyringsSystem.Database;
 using Dapper;
-using LagerstyringsSystem.Endpoints.AuthenticationEndpoints;
-using Lagerstyrings_System;
 
 namespace Lagerstyrings_System
 {
@@ -13,11 +11,12 @@ namespace Lagerstyrings_System
         public ProductRepository(ISqlConnectionFactory factory)
         => _factory = factory;
 
+        //todo: fix productenumtype mapping in dapper. Currently not working as intended.
         public async Task<int> CreateProductAsync(Product product)
         {
             var sql = @"
-                INSERT INTO dbo.Products (Name, ProductType)
-                VALUES (@Name, @ProductType);
+                INSERT INTO dbo.Products (Name, [Type])
+                VALUES (@Name, @Type);
                 SELECT CAST(SCOPE_IDENTITY() as int);";
 
             using var conn = _factory.Create();
@@ -34,8 +33,7 @@ namespace Lagerstyrings_System
             using var conn = _factory.Create();
             conn.Open();
 
-            var product = await conn.QuerySingleOrDefaultAsync<Product>(sql, new { productId });
-            return product;
+            return await conn.QuerySingleOrDefaultAsync<Product>(sql, new { productId });
         }
 
         public async Task<IEnumerable<Product>> GetAllProductsAsync()
@@ -45,8 +43,7 @@ namespace Lagerstyrings_System
             using var conn = _factory.Create();
             conn.Open();
 
-            var products = await conn.QueryAsync<Product>(sql);
-            return products;
+            return await conn.QueryAsync<Product>(sql);
         }
 
         public async Task<bool> UpdateProductAsync(Product product)
@@ -54,7 +51,7 @@ namespace Lagerstyrings_System
             var sql = @"
                 UPDATE dbo.Products
                 SET Name = @Name,
-                    ProductType = @ProductType
+                    [Type] = @Type
                 WHERE Id = @Id;";
 
             using var conn = _factory.Create();
@@ -81,16 +78,22 @@ namespace Lagerstyrings_System
     /// </summary>
     public class Product : IProduct
     {
-        //private static readonly ProductTypeEnum DEFAULT_PRODUCT_TYPE = ProductTypeEnum.Other;
         public int Id { get; set; }
-        public string Name { get; set; }
-        public ProductTypeEnum ProductType { get; set; }
-        public Product() {}
+        public string Name { get; set; } = "";
 
-        public Product(string name, ProductTypeEnum productType)
+        public string Type { get; set; } = "";
+
+        public ProductTypeEnum ProductType
+        {
+            get => Enum.TryParse<ProductTypeEnum>(Type, out var e) ? e : ProductTypeEnum.Other;
+            set => Type = value.ToString();
+        }
+
+        public Product() { }
+        public Product(string name, string type)
         {
             Name = name;
-            ProductType = productType;
+            Type = type;
         }
     }
 }

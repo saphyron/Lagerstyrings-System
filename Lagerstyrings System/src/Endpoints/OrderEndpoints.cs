@@ -1,6 +1,3 @@
-using System.Text;
-using Dapper;
-using LagerstyringsSystem.Database;
 using Microsoft.AspNetCore.Http.HttpResults;
 using LagerstyringsSystem.Orders;
 
@@ -10,8 +7,7 @@ namespace LagerstyringsSystem.Endpoints
     {
         public static RouteGroupBuilder MapOrderEndpoints(this IEndpointRouteBuilder routes)
         {
-            var group = routes.MapGroup("/orders")
-                              .WithTags("Orders");
+            var group = routes.MapGroup("/orders").WithTags("Orders");
 
             // POST /orders
             group.MapPost("/",
@@ -22,15 +18,16 @@ namespace LagerstyringsSystem.Endpoints
                 });
 
             // GET /orders/{orderId}
-            group.MapGet("/{orderId}",
-                async Task<Results<Ok<Order>, NotFound>> (int orderId, OrderRepository repository) =>
+            group.MapGet("/{orderId:long}",
+                async Task<Results<Ok<Order>, NotFound>> (long orderId, OrderRepository repository) =>
                 {
                     var order = await repository.GetOrderByIdAsync(orderId);
                     return order is null ? TypedResults.NotFound() : TypedResults.Ok(order);
                 });
+            //todo: get all orders
 
-            // GET /{userId}
-            group.MapGet("/{userId}/orders",
+            // GET /orders/by-user/{userId}
+            group.MapGet("/by-user/{userId:int}",
                 async (int userId, OrderRepository repository) =>
                 {
                     var orders = await repository.GetAllOrdersByUserAsync(userId);
@@ -38,81 +35,51 @@ namespace LagerstyringsSystem.Endpoints
                 });
 
             // PUT /orders/{orderId}
-            group.MapPut("/{orderId}",
-                async (int orderId, Order updatedOrder, OrderRepository repository) =>
+            group.MapPut("/{orderId:long}",
+                async (long orderId, Order updatedOrder, OrderRepository repository) =>
                 {
-                    var existingOrder = await repository.GetOrderByIdAsync(orderId);
-                    if (existingOrder is null)
-                    {
-                        return Results.NotFound();
-                    }
+                    var existing = await repository.GetOrderByIdAsync(orderId);
+                    if (existing is null) return Results.NotFound();
 
                     updatedOrder.Id = orderId;
-                    var success = await repository.UpdateOrderAsync(updatedOrder);
-                    return success ? Results.NoContent() : Results.StatusCode(500);
+                    var ok = await repository.UpdateOrderAsync(updatedOrder);
+                    return ok ? Results.NoContent() : Results.StatusCode(500);
+                });
+
+            // PATCH /orders/{orderId}/status
+            group.MapPatch("/{orderId:long}/status",
+                async Task<Results<NoContent, NotFound, BadRequest<string>>> (long orderId, StatusRequest body, OrderRepository repository) =>
+                {
+                    if (string.IsNullOrWhiteSpace(body.Status)) return TypedResults.BadRequest("Status is required.");
+                    var allowed = new[] { "Draft", "Shipped", "Cancelled", "OnHold" };
+                    if (!allowed.Contains(body.Status)) return TypedResults.BadRequest("Invalid status.");
+
+                    var exists = await repository.GetOrderByIdAsync(orderId);
+                    if (exists is null) return TypedResults.NotFound();
+
+                    var ok = await repository.UpdateOrderStatusAsync(orderId, body.Status);
+                    return ok ? TypedResults.NoContent() : TypedResults.BadRequest("Could not update status.");
                 });
 
             // DELETE /orders/{orderId}
-            group.MapDelete("/{orderId}",
-                async (int orderId, OrderRepository repository) =>
+            group.MapDelete("/{orderId:long}",
+                async (long orderId, OrderRepository repository) =>
                 {
-                    var existingOrder = await repository.GetOrderByIdAsync(orderId);
-                    if (existingOrder is null)
-                    {
-                        return Results.NotFound();
-                    }
+                    var existing = await repository.GetOrderByIdAsync(orderId);
+                    if (existing is null) return Results.NotFound();
 
-                    var success = await repository.DeleteOrderAsync(orderId);
-                    return success ? Results.NoContent() : Results.StatusCode(500);
+                    var ok = await repository.DeleteOrderAsync(orderId);
+                    return ok ? Results.NoContent() : Results.StatusCode(500);
                 });
+
+            // todo: get all orders endpoint
 
             return group;
         }
 
-        // public static void MapOrderEndpoints(this WebApplication app)
-        // {
-        //     app.MapPost("/orders", async (Order order, OrderRepository repository) =>
-        //     {
-        //         var orderId = await repository.CreateOrderAsync(order);
-        //         return Results.Created($"/orders/{orderId}", orderId);
-        //     });
-
-        //     app.MapGet("/orders/{orderId}", async (int orderId, OrderRepository repository) =>
-        //     {
-        //         var order = await repository.GetOrderByIdAsync(orderId);
-        //         return order is not null ? Results.Ok(order) : Results.NotFound();
-        //     });
-
-        //     app.MapGet("/auth/users/{userId}/orders", async (int userId, OrderRepository repository) =>
-        //     {
-        //         var orders = await repository.GetAllOrdersByUserAsync(userId);
-        //         return Results.Ok(orders);
-        //     });
-
-        //     app.MapPut("/orders/{orderId}", async (int orderId, Order updatedOrder, OrderRepository repository) =>
-        //     {
-        //         var existingOrder = await repository.GetOrderByIdAsync(orderId);
-        //         if (existingOrder is null)
-        //         {
-        //             return Results.NotFound();
-        //         }
-
-        //         updatedOrder.Id = orderId;
-        //         var success = await repository.UpdateOrderAsync(updatedOrder);
-        //         return success ? Results.NoContent() : Results.StatusCode(500);
-        //     });
-
-        //     app.MapDelete("/orders/{orderId}", async (int orderId, OrderRepository repository) =>
-        //     {
-        //         var existingOrder = await repository.GetOrderByIdAsync(orderId);
-        //         if (existingOrder is null)
-        //         {
-        //             return Results.NotFound();
-        //         }
-
-        //         var success = await repository.DeleteOrderAsync(orderId);
-        //         return success ? Results.NoContent() : Results.StatusCode(500);
-        //     });
-        // }
+        public sealed class StatusRequest
+        {
+            public string Status { get; set; } = "";
+        }
     }
 }

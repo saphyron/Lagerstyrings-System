@@ -2,12 +2,13 @@ using System.Text;
 using System.IdentityModel.Tokens.Jwt;                 
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+//using Microsoft.IdentityModel.Logging; //temp: for showing PII in dev
 
 var builder = WebApplication.CreateBuilder(args);
 
 // ----------------------- Razor Pages + auth-konventioner -----------------------
-builder.Services.AddRazorPages(opts =>
-{
+builder.Services.AddRazorPages(opts => {
     // All pages require auth...
     opts.Conventions.AuthorizeFolder("/");
 
@@ -19,16 +20,27 @@ builder.Services.AddRazorPages(opts =>
 });
 
 // ----------------------- JWT-konfiguration ----------------
-var issuer   = builder.Configuration["Jwt:Issuer"]   ?? "your-issuer";
-var audience = builder.Configuration["Jwt:Audience"] ?? "your-audience";
-var key      = builder.Configuration["Jwt:Secret"]   ?? "dev-secret-change-me";
-var signing  = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+var issuer   = builder.Configuration["Jwt:Issuer"]   ?? throw new InvalidOperationException("Jwt:Issuer missing");
+var audience = builder.Configuration["Jwt:Audience"] ?? throw new InvalidOperationException("Jwt:Audience missing");
+var key = builder.Configuration["Jwt:Key"] ?? throw new InvalidOperationException("Jwt:Key missing");
+//Console.WriteLine($"JWT Key SHA256 (frontend): {KeyFingerprint(key)}"); // debug
+
+var signing = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(key));
+
+// DEV: se mere detaljerede fejl (slå FRA igen når det virker)
+/*IdentityModelEventSource.ShowPII = true;
+
+static string KeyFingerprint(string key)
+{
+    using var sha = System.Security.Cryptography.SHA256.Create();
+    var bytes = Encoding.UTF8.GetBytes(key);
+    var hash = sha.ComputeHash(bytes);
+    return Convert.ToHexString(hash); // f.eks. "A1B2C3..."
+}*/
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(o =>
-    {
-        o.TokenValidationParameters = new()
-        {
+    .AddJwtBearer(o => {
+        o.TokenValidationParameters = new() {
             ValidIssuer = issuer,
             ValidAudience = audience,
             IssuerSigningKey = signing,
@@ -36,10 +48,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateIssuerSigningKey = true,
             ValidateLifetime = true,
-
-            NameClaimType = JwtRegisteredClaimNames.UniqueName
+            ClockSkew = TimeSpan.FromMinutes(2),
         };
-
         o.Events = new JwtBearerEvents
         {
             OnMessageReceived = ctx =>
@@ -49,6 +59,18 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 {
                     ctx.Token = jwt;
                 }
+                return Task.CompletedTask;
+            },
+            OnAuthenticationFailed = ctx =>
+            {
+                // Token kan ikke valideres (forkert nøgle/udløbet/korrupt) => drop cookien
+                ctx.Response.Cookies.Delete("AuthToken", new CookieOptions { Path = "/" });
+                return Task.CompletedTask;
+            },
+            OnChallenge = ctx =>
+            {
+                ctx.HandleResponse(); // undertryk standard 401-svar
+                ctx.Response.Redirect("/Account/Login");
                 return Task.CompletedTask;
             }
         };
